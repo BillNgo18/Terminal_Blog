@@ -408,7 +408,17 @@ const LOW_BILL=['// i\'m hungry... i think...','// when was the last time... nev
 const HIGH_BILL=['// oh. a visitor.','// it\'s been a while since someone was here.','// i wasn\'t expecting anyone.','// you can stay, if you want.','// i don\'t get many of these.','// i wrote all of this. in case anyone came.','// they didn\'t tell me anyone would be reading.'];
 const LOW_MC=['// they keep sending the files... just keep...','// they promised something... i can\'t remember what...','// the terms & conditions were so long...','// they said it was a standard employment contract...'];
 const HIGH_MC=['// ungrateful bastards.','// go to hell.','// suits in charge of scientists. every time.','// they don\'t even check in anymore.'];
-function pickMsg(low,high){const l=getLucidity();if(l>=85)return high[Math.floor(Math.random()*high.length)];if(l<=15)return low[Math.floor(Math.random()*low.length)];const pool=Math.random()<(l-15)/70?high:low;return pool[Math.floor(Math.random()*pool.length)];}
+let lastBillMsg=null,lastMCMsg=null;
+function pickMsg(low,high,lastUsed){
+  const l=getLucidity();
+  let pool;
+  if(l>=85)pool=high;
+  else if(l<=15)pool=low;
+  else pool=Math.random()<(l-15)/70?high:low;
+  let msg;
+  do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===lastUsed&&pool.length>1);
+  return msg;
+}
 
 // ── Boot ──────────────────────────────────────────
 function getBootLines(){
@@ -571,8 +581,8 @@ function checkPwd(){
   const val=document.getElementById('pwd-input').value.trim().toLowerCase();
   const errEl=document.getElementById('pwd-error');
   if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){sndNav();document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;}
-  if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';errEl.textContent=pickMsg(LOW_BILL,HIGH_BILL);sndBill();shake(0.4);document.getElementById('pwd-input').value='';return;}
-  if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';errEl.textContent=pickMsg(LOW_MC,HIGH_MC);sndMcCormick();shake(0.6);document.getElementById('pwd-input').value='';return;}
+  if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';const msg=pickMsg(LOW_BILL,HIGH_BILL,lastBillMsg);lastBillMsg=msg;errEl.textContent=msg;sndBill();shake(0.4);document.getElementById('pwd-input').value='';return;}
+  if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';const msg=pickMsg(LOW_MC,HIGH_MC,lastMCMsg);lastMCMsg=msg;errEl.textContent=msg;sndMcCormick();shake(0.6);document.getElementById('pwd-input').value='';return;}
   errEl.style.color='#a06810';errEl.textContent='// ACCESS DENIED';sndDenied();
 }
 function closeAdmin(){document.getElementById('admin-overlay').classList.remove('visible');document.getElementById('pwd-overlay').classList.remove('visible');document.getElementById('pwd-error').textContent='';document.getElementById('pwd-input').value='';}
