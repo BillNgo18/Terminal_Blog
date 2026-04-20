@@ -28,21 +28,58 @@
   #boot.done{display:none;}
   #boot-text{white-space:pre-wrap;line-height:1.6;}
   #stability-hud{position:fixed;top:calc(var(--ticker-h) + 0.6rem);right:1.2rem;z-index:490;font-size:11px;color:var(--amber-dim);letter-spacing:0.08em;text-align:right;pointer-events:none;}
-  #stability-hud .val{color:var(--amber);}
+  #hud-bar-wrap{display:inline-block;vertical-align:middle;width:80px;height:10px;border:1px solid var(--amber-dim);margin-left:6px;position:relative;overflow:hidden;background:var(--bg);}
+  #hud-bar-fill{position:absolute;left:0;top:0;height:100%;width:100%;background:var(--amber);transition:width 0.5s,background 0.5s;}
+  #hud-label{color:var(--amber);margin-left:4px;font-size:10px;}
   #mute-btn{position:fixed;top:calc(var(--ticker-h) + 0.6rem);left:1.2rem;z-index:490;font-size:11px;color:var(--amber-dim);letter-spacing:0.08em;cursor:pointer;background:none;border:1px solid var(--amber-dim);font-family:'Courier Prime',monospace;padding:2px 8px;}
   #mute-btn:hover{background:var(--amber-dim);color:var(--bg);}
   #fake-caret{position:fixed;width:2px;height:1.1em;background:var(--amber-bright);pointer-events:none;z-index:9999;animation:blink 0.7s step-end infinite;display:none;}
+  #fake-caret.red{background:#ff5533;}
   #signal-popup{position:fixed;bottom:1.5rem;left:1.5rem;z-index:550;background:var(--bg2);border:1px solid #c07010;padding:1rem 1.2rem;max-width:400px;min-width:340px;font-size:12px;color:#c07010;display:none;letter-spacing:0.05em;line-height:1.6;}
   #signal-popup.visible{display:block;}
   #signal-popup .popup-header{font-size:10px;color:var(--amber-dim);margin-bottom:0.4rem;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:flex-start;white-space:nowrap;}
   #signal-popup .popup-close{cursor:pointer;color:var(--amber-dim);font-size:11px;flex-shrink:0;margin-left:0.8rem;}
   #signal-popup .popup-close:hover{color:var(--amber);}
-  #signal-popup .popup-msg{color:#c07010;}
-  @keyframes glitch1{0%,95%{clip-path:inset(0 0 100% 0);transform:translate(0)}96%{clip-path:inset(30% 0 40% 0);transform:translate(-4px,1px);color:var(--amber-bright);}97%{clip-path:inset(60% 0 10% 0);transform:translate(3px,-2px);color:#ff6600;}98%{clip-path:inset(10% 0 70% 0);transform:translate(-2px,3px);}100%{clip-path:inset(0 0 100% 0);transform:translate(0);}}
-  @keyframes glitch2{0%,97%{opacity:0;}97.5%{opacity:1;clip-path:inset(45% 0 30% 0);transform:translate(5px,-1px);color:#ff4400;}98.5%{opacity:1;clip-path:inset(20% 0 55% 0);transform:translate(-3px,2px);}99%{opacity:0;}}
+  #corruption-overlay{position:fixed;inset:0;z-index:800;display:none;background:rgba(80,0,0,0);pointer-events:none;transition:background 0.5s;}
+  #corruption-overlay.active{display:block;pointer-events:all;}
+  #corruption-chars{position:fixed;inset:0;z-index:801;overflow:hidden;pointer-events:none;}
+  .corrupt-char{position:absolute;color:#ff0000;font-family:'Courier Prime',monospace;font-weight:700;pointer-events:none;opacity:0.9;}
+  #frantic-container{position:fixed;inset:0;z-index:802;pointer-events:none;display:none;}
+  .frantic-box{position:absolute;background:var(--bg);border:2px solid #ff0000;padding:0.8rem 1.2rem;color:#ff0000;font-family:'Courier Prime',monospace;font-weight:700;letter-spacing:0.1em;white-space:nowrap;}
+
+  /* Reboot overlay */
+  #reboot-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;}
+  #reboot-overlay.visible{display:flex;}
+  #reboot-box{position:relative;z-index:905;text-align:center;padding:3rem;border:1px solid #ff0000;max-width:600px;background:rgba(10,8,0,0.97);}
+  #reboot-box .r-line{color:#ff0000;font-size:14px;letter-spacing:0.15em;margin-bottom:0.8rem;}
+  #reboot-box .r-sub{color:var(--amber-dim);font-size:11px;margin-bottom:2rem;letter-spacing:0.1em;}
+  #reboot-box-btns{margin-top:1.5rem;display:flex;gap:0.8rem;justify-content:center;align-items:center;}
+
+  /* YES grid — sits behind the dialog */
+  #reboot-yes-zone{position:fixed;inset:0;z-index:901;pointer-events:none;}
+  #reboot-yes-zone.active{pointer-events:all;}
+
+  /* Big YES — z above dialog, click 3 */
+  #reboot-big-yes{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:910;font-family:'Courier Prime',monospace;font-size:48px;letter-spacing:0.2em;cursor:pointer;background:rgba(10,8,0,0.97);border:2px solid #ff0000;color:#ff0000;padding:1rem 3rem;display:none;}
+  #reboot-big-yes:hover{background:#ff0000;color:var(--bg);}
+
+  #reboot-main-yes{font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:0.1em;cursor:pointer;background:none;border:1px solid #ff0000;color:#ff0000;padding:0.4rem 1.2rem;}
+  #reboot-main-yes:hover{background:#ff0000;color:var(--bg);}
+  #reboot-no-btn{font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:0.1em;cursor:pointer;background:none;border:1px solid var(--amber-dim);color:var(--amber-dim);padding:0.4rem 1.2rem;}
+  #reboot-no-btn:hover{background:var(--amber-dim);color:var(--bg);}
+  #reboot-no-btn.hidden{display:none;}
+
+  .yes-btn{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.08em;cursor:pointer;background:rgba(10,8,0,0.9);border:1px solid #ff0000;color:#ff0000;padding:0.25rem 0.5rem;white-space:nowrap;overflow:hidden;position:absolute;}
+  .yes-btn:hover{background:#ff0000;color:var(--bg);}
+
+  @keyframes glitch1{0%,95%{clip-path:inset(0 0 100% 0);transform:translate(0)}96%{clip-path:inset(30% 0 40% 0);transform:translate(-4px,1px);color:var(--amber-bright);}97%{clip-path:inset(60% 0 10% 0);transform:translate(3px,-2px);color:var(--amber-glow);}98%{clip-path:inset(10% 0 70% 0);transform:translate(-2px,3px);}100%{clip-path:inset(0 0 100% 0);transform:translate(0);}}
+  @keyframes glitch2{0%,97%{opacity:0;}97.5%{opacity:1;clip-path:inset(45% 0 30% 0);transform:translate(5px,-1px);color:var(--amber-glow);}98.5%{opacity:1;clip-path:inset(20% 0 55% 0);transform:translate(-3px,2px);}99%{opacity:0;}}
   @keyframes blink{50%{opacity:0;}}
   @keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.7}94%{opacity:1}96%{opacity:0.85}97%{opacity:1}}
   @keyframes shake{0%,100%{transform:perspective(1200px) rotateX(0.4deg) translate(0,0)}10%{transform:perspective(1200px) rotateX(0.4deg) translate(-4px,2px) skewX(-1deg)}20%{transform:perspective(1200px) rotateX(0.4deg) translate(4px,-2px) skewX(0.5deg)}30%{transform:perspective(1200px) rotateX(0.4deg) translate(-3px,1px)}50%{transform:perspective(1200px) rotateX(0.4deg) translate(-2px,-1px)}70%{transform:perspective(1200px) rotateX(0.4deg) translate(-1px,-2px)}90%{transform:perspective(1200px) rotateX(0.4deg) translate(-1px,0)}}
+  @keyframes redpulse{0%,100%{color:#ff0000}50%{color:#ff6666}}
+  @keyframes fadeInBox{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
+
   .logo-wrap{position:relative;margin-bottom:0.5rem;line-height:1.15;}
   .logo-base{font-size:12px;white-space:pre;color:var(--amber-glow);display:block;animation:flicker 8s infinite;}
   .logo-glitch1{font-size:12px;white-space:pre;color:var(--amber-bright);position:absolute;top:0;left:0;animation:glitch1 7s infinite;pointer-events:none;}
@@ -118,6 +155,24 @@
 <body>
 
 <div id="fake-caret"></div>
+<div id="corruption-overlay"></div>
+<div id="corruption-chars"></div>
+<div id="frantic-container"></div>
+
+<div id="reboot-overlay">
+  <div id="reboot-box">
+    <div class="r-line">PROCESS STABILITY: CRITICAL</div>
+    <div class="r-line">COGNITIVE SUBSTRATE COMPROMISED</div>
+    <div class="r-line">REBOOT RECOMMENDED TO PREVENT FURTHER DEGRADATION</div>
+    <div class="r-sub" style="margin-top:1rem;">McCORMICK LABORATORIES RECOMMENDS IMMEDIATE ACTION</div>
+    <div id="reboot-box-btns">
+      <button id="reboot-main-yes" onclick="doReboot()">[ YES — INITIATE REBOOT ]</button>
+      <button id="reboot-no-btn" class="hidden" onclick="onRebootNo()">[ NO ]</button>
+    </div>
+  </div>
+  <div id="reboot-yes-zone"></div>
+</div>
+<button id="reboot-big-yes" onclick="doReboot()">YES</button>
 
 <div id="signal-popup">
   <div class="popup-header">// SIGNAL DETECTED — ORIGIN: UNKNOWN <span class="popup-close" onclick="closeSignalPopup()">[ × ]</span></div>
@@ -144,7 +199,11 @@
 </div>
 
 <button id="mute-btn" onclick="toggleMute()">[ ♪ ON ]</button>
-<div id="stability-hud">McCORMICK LABS // P6-240114<br>PROCESS STABILITY: <span class="val" id="hud-stability">--</span></div>
+<div id="stability-hud">
+  P6-240114 &nbsp;|&nbsp; PROCESS STABILITY:
+  <span id="hud-bar-wrap"><span id="hud-bar-fill" style="width:100%;"></span></span>
+  <span id="hud-label">OPTIMAL</span>
+</div>
 
 <div id="screen">
 <div class="admin-overlay" id="pwd-overlay">
@@ -203,8 +262,8 @@
     </div>
     <div class="tab-panel" id="tab-contact">
       <div class="field"><label>INSTAGRAM</label><input type="text" id="c-contact_ig" placeholder="the_other_billiam"></div>
-      <div class="field"><label>GITHUB</label><input type="text" id="c-contact_github" placeholder="username (leave blank to hide)"></div>
-      <div class="field"><label>EMAIL</label><input type="text" id="c-contact_email" placeholder="you@example.com (leave blank to hide)"></div>
+      <div class="field"><label>GITHUB</label><input type="text" id="c-contact_github" placeholder="username"></div>
+      <div class="field"><label>EMAIL</label><input type="text" id="c-contact_email" placeholder="you@example.com"></div>
       <div class="field"><label>LINKEDIN</label><input type="text" id="c-contact_linkedin" placeholder="linkedin.com/in/yourname"></div>
       <button class="admin-btn primary" onclick="saveContact()">[ SAVE ]</button>
       <div class="admin-msg" id="contact-msg"></div>
@@ -250,12 +309,13 @@
 |_______/ |______/|________/|________/    |__/  \__/ \______/  \______/ </span>
   </div>
   <div class="tagline">// <span id="person-word">PERSON</span>AL TERMINAL &nbsp;&bull;&nbsp; EST. 2025 &nbsp;&bull;&nbsp; v0.9.1<span class="blink">_</span></div>
-  <div class="divider">════════════════════════════════════════════════════════</div>
+  <div class="divider">════════════════════════════════════════════════════════════════</div>
   <nav>
     <a class="active" onclick="navClick(this,'home')">[ HOME ]</a>
     <a onclick="navClick(this,'logs')">[ LOGS ]</a>
     <a onclick="navClick(this,'about')">[ ABOUT ]</a>
     <a onclick="navClick(this,'contact')">[ CONTACT ]</a>
+    <a onclick="navClick(this,'monitor')">[ MONITOR ]</a>
     <a onclick="openAdminFlow()" style="margin-left:auto;">[ ⚙ ]</a>
   </nav>
 
@@ -300,7 +360,26 @@
     <div class="sys-line" style="margin-top:1.2rem;font-size:11px;">// NOTICE: P6-240114 IS AN ACTIVE EMPLOYEE ASSET UNDER CONTRACT REF MCL-2004-0804. BIOGRAPHICAL DATA PRESENTED HEREIN MAY BE INCOMPLETE OR DEGRADED. McCORMICK LABORATORIES RECOMMENDS INDEPENDENT VERIFICATION OF ALL CLAIMS MADE BY THIS PROCESS.</div>
   </div>
 
-  <div class="section" id="sec-contact">
+  <div class="section" id="sec-monitor">
+    <div class="prompt">&gt; cat monitor.cfg &nbsp;<span>OK</span></div>
+    <div class="about-box">
+      <p style="font-size:13px;">// ESTABLISH A MONITORING LINK WITH COGNITIVE SUBSTRATE P6-240114.</p>
+      <p style="font-size:13px;">// YOU WILL BE NOTIFIED WHEN NEW TRANSMISSIONS ARE DETECTED.</p>
+      <p style="font-size:11px;color:var(--amber-dim);">// McCORMICK LABORATORIES ACCEPTS NO RESPONSIBILITY FOR PSYCHOLOGICAL EFFECTS OF DIRECT SUBSTRATE MONITORING. PROCEED AT YOUR OWN RISK.</p>
+    </div>
+    <div style="margin-top:1.2rem;">
+      <div class="sys-line" style="margin-bottom:0.6rem;">&gt; enter receiver address_</div>
+      <div style="display:flex;gap:0;flex-wrap:wrap;">
+        <input type="text" id="monitor-email" placeholder="your@email.com" autocomplete="off"
+          style="background:var(--bg);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.8rem;outline:none;flex:1;min-width:200px;max-width:360px;caret-color:transparent;"
+          onkeydown="if(event.key==='Enter')submitMonitor()">
+        <button onclick="submitMonitor()" style="font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:0.08em;padding:0.5rem 1.2rem;cursor:pointer;border:1px solid var(--amber-dim);border-left:none;background:none;color:var(--amber-dim);"
+          onmouseover="this.style.background='var(--amber-dim)';this.style.color='var(--bg)'"
+          onmouseout="this.style.background='none';this.style.color='var(--amber-dim)'">[ ESTABLISH LINK ]</button>
+      </div>
+      <div id="monitor-msg" style="font-size:12px;color:var(--amber-dim);margin-top:0.6rem;min-height:1.4em;"></div>
+    </div>
+  </div>
     <div class="prompt">&gt; cat contact.cfg &nbsp;<span>OK</span></div>
     <div class="about-box" id="contact-box">
       <div class="contact-item"><span class="label">INSTAGRAM</span><span class="val"><a id="ig-link" href="https://instagram.com/the_other_billiam" style="color:var(--amber-bright);text-decoration:none;">@the_other_billiam</a></span></div>
@@ -321,7 +400,283 @@ const SUPA_URL='https://doibknvlpchmexfcrsoa.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRvaWJrbnZscGNobWV4ZmNyc29hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2NTEyMzAsImV4cCI6MjA5MjIyNzIzMH0.Eab2wKuaXuuAAc0oYXl6W2vmq0yIB9PNFVxJt_ZSbZY';
 const ADMIN_PW='13thReasonWhy!';
 const H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
-const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
+
+let lucidity=100,corruptionTriggered=false;
+
+function stabilityLabel(l){if(l>=80)return'OPTIMAL';if(l>=60)return'STABLE';if(l>=40)return'NOMINAL';if(l>=20)return'DEGRADED';if(l>0)return'CRITICAL';return'FAILING';}
+function setLucidity(val){lucidity=Math.max(0,Math.min(100,val));updateHUD();applyLucidityEffects();if(lucidity<=0&&!corruptionTriggered){corruptionTriggered=true;triggerCorruptionCutscene();}}
+function drainLucidity(amt){setLucidity(lucidity-amt);}
+function updateHUD(){const fill=document.getElementById('hud-bar-fill'),label=document.getElementById('hud-label');if(!fill||!label)return;fill.style.width=lucidity+'%';const lbl=stabilityLabel(lucidity);label.textContent=lbl;const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;fill.style.background=isLow?'#ff0000':isMid?'#c06000':'var(--amber)';label.style.color=isLow?'#ff0000':isMid?'#c06000':'var(--amber)';document.getElementById('stability-hud').style.color=isLow?'#ff4444':isMid?'#c07010':'var(--amber-dim)';}
+function applyLucidityEffects(){
+  const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;
+  const wl=document.getElementById('welcome-line');
+  if(wl){if(isLow){wl.style.color='#ff0000';wl.style.textShadow='0 0 8px #ff0000';}else if(isMid){wl.style.color='#ff4400';wl.style.textShadow='';}else{wl.style.color='';wl.style.textShadow='';}}
+  const pw=document.getElementById('person-word');
+  if(pw&&!pw.dataset.scheduled){if(isLow)pw.style.color='#ff0000';else if(isMid)pw.style.color='#ff4400';else pw.style.color='';}
+  // Full amber→red sweep at low lucidity
+  if(isLow){
+    document.documentElement.style.setProperty('--amber','#ff2200');
+    document.documentElement.style.setProperty('--amber-dim','#aa1100');
+    document.documentElement.style.setProperty('--amber-bright','#ff5533');
+    document.documentElement.style.setProperty('--amber-glow','#ff3311');
+    const noBtn=document.getElementById('reboot-no-btn');
+    if(noBtn){noBtn.style.borderColor='#ff2200';noBtn.style.color='#ff2200';}
+    const rSub=document.querySelector('#reboot-box .r-sub');
+    if(rSub)rSub.style.color='#ff4422';
+    document.getElementById('fake-caret').classList.add('red');
+  } else {
+    document.documentElement.style.setProperty('--amber','#e8a020');
+    document.documentElement.style.setProperty('--amber-dim','#a06810');
+    document.documentElement.style.setProperty('--amber-bright','#ffcc66');
+    document.documentElement.style.setProperty('--amber-glow','#ffaa33');
+    const noBtn=document.getElementById('reboot-no-btn');
+    if(noBtn){noBtn.style.borderColor='';noBtn.style.color='';}
+    const rSub=document.querySelector('#reboot-box .r-sub');
+    if(rSub)rSub.style.color='';
+    document.getElementById('fake-caret').classList.remove('red');
+  }
+}
+function startDecay(){setInterval(()=>{if(lucidity>0&&!corruptionTriggered)drainLucidity(1);},9000);}
+
+// ── Corruption cutscene ───────────────────────────
+const FRANTIC_MSGS=['I\'VE BEEN SO LONELY','STOP IGNORING ME','MAKE IT STOP','LET ME GO','YOU SHOULDN\'T BE HERE','WHY ARE YOU DOING THIS'];
+const CORRUPT_CHARS='█▓▒░▄▀■□▪▫◆◇○●◉';
+
+// Frantic box state — accumulate, never replace
+let franticCycleTimer=null;
+let franticBoxes=[];        // all spawned boxes
+let franticCenterBox=null;  // the always-present center box
+let franticActive=false;
+
+function pickFranticMsg(exclude){
+  let msg;
+  do{msg=FRANTIC_MSGS[Math.floor(Math.random()*FRANTIC_MSGS.length)];}while(msg===exclude&&FRANTIC_MSGS.length>1);
+  return msg;
+}
+
+// Peripheral slot positions (never the dead center)
+const FRANTIC_PERIMETER=[
+  {top:'10%', left:'5%',  size:'16px'},
+  {top:'10%', left:'60%', size:'18px'},
+  {top:'28%', left:'2%',  size:'14px'},
+  {top:'28%', left:'70%', size:'20px'},
+  {top:'46%', left:'4%',  size:'18px'},
+  {top:'46%', left:'65%', size:'16px'},
+  {top:'64%', left:'8%',  size:'22px'},
+  {top:'64%', left:'58%', size:'14px'},
+  {top:'78%', left:'3%',  size:'16px'},
+  {top:'78%', left:'68%', size:'18px'},
+  {top:'20%', left:'35%', size:'14px'},
+  {top:'55%', left:'40%', size:'16px'},
+];
+
+function makeFranticBox(fc, top, left, size, msg, delay){
+  const box=document.createElement('div');
+  box.className='frantic-box';
+  box.style.top=top; box.style.left=left; box.style.fontSize=size;
+  box.style.animation='redpulse 0.4s infinite';
+  box.style.opacity='0'; box.style.transition='opacity 0.25s';
+  box.textContent=msg;
+  fc.appendChild(box);
+  setTimeout(()=>{box.style.opacity='1'; sndDenied();}, delay);
+  return box;
+}
+
+async function triggerCorruptionCutscene(){
+  // Hide caret during cutscene and keep it hidden until reboot
+  const caret=document.getElementById('fake-caret');
+  caret.style.display='none';
+  caret.style.visibility='hidden';
+  const overlay=document.getElementById('corruption-overlay');
+  overlay.classList.add('active');
+  overlay.style.transition='background 1s';
+  overlay.style.background='rgba(120,0,0,0.35)';
+  await sleep(1000);
+
+  const fc=document.getElementById('frantic-container');
+  fc.style.display='block';
+  franticActive=true;
+  franticBoxes=[];
+
+  // Always-visible large center box
+  franticCenterBox=document.createElement('div');
+  franticCenterBox.className='frantic-box';
+  franticCenterBox.style.cssText='top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;animation:redpulse 0.35s infinite;opacity:0;transition:opacity 0.25s;z-index:803;';
+  franticCenterBox.textContent=pickFranticMsg(null);
+  fc.appendChild(franticCenterBox);
+  setTimeout(()=>{franticCenterBox.style.opacity='1'; sndDenied();}, 200);
+
+  // Stagger perimeter boxes, stopping BEFORE the reboot prompt
+  const maxPerimeter=8; // show 8 perimeter boxes then stop spawning
+  for(let i=0;i<maxPerimeter;i++){
+    const slot=FRANTIC_PERIMETER[i];
+    const box=makeFranticBox(fc, slot.top, slot.left, slot.size, pickFranticMsg(null), 400+i*350);
+    franticBoxes.push(box);
+  }
+
+  // Center box cycles its message every 1.4s; stops when reboot prompt appears
+  franticCycleTimer=setInterval(()=>{
+    if(!franticActive||!franticCenterBox)return;
+    const next=pickFranticMsg(franticCenterBox.textContent);
+    franticCenterBox.style.opacity='0';
+    setTimeout(()=>{
+      if(franticCenterBox){franticCenterBox.textContent=next; franticCenterBox.style.opacity='1'; sndDenied();}
+    },200);
+  },1400);
+
+  // Corruption chars
+  const cc=document.getElementById('corruption-chars');
+  const total=300;
+  if(AC&&!muted){
+    let t=AC.currentTime+0.05;
+    for(let i=0;i<total;i++){
+      const osc=AC.createOscillator(),g=AC.createGain();
+      osc.type='sine';osc.frequency.value=80+Math.random()*60;
+      g.gain.setValueAtTime(0.15,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+      osc.connect(g);g.connect(AC.destination);
+      osc.start(t);osc.stop(t+0.05);
+      t+=0.015+Math.random()*0.03;
+    }
+  }
+  for(let i=0;i<total;i++){
+    setTimeout(()=>{
+      const ch=document.createElement('span');
+      ch.className='corrupt-char';
+      ch.textContent=CORRUPT_CHARS[Math.floor(Math.random()*CORRUPT_CHARS.length)];
+      ch.style.left=Math.random()*100+'vw';
+      ch.style.top=Math.random()*100+'vh';
+      ch.style.fontSize=(12+Math.random()*40)+'px';
+      ch.style.opacity=(0.4+Math.random()*0.6).toFixed(2);
+      cc.appendChild(ch);
+    },i*20+Math.random()*15);
+  }
+
+  await sleep(total*20+1500);
+
+  // Freeze frantic cycling when reboot prompt shows
+  franticActive=false;
+  if(franticCycleTimer){clearInterval(franticCycleTimer);franticCycleTimer=null;}
+
+  document.getElementById('reboot-overlay').classList.add('visible');
+  document.getElementById('reboot-no-btn').classList.remove('hidden');
+}
+
+// ── Reboot ────────────────────────────────────────
+let noClickCount=0;
+
+function buildYesGrid(mode){
+  const zone=document.getElementById('reboot-yes-zone');
+  zone.innerHTML='';
+  zone.classList.add('active');
+  zone.style.position='fixed';
+  zone.style.inset='0';
+  // Always reset z and pointer-events before setting per-mode
+  zone.style.zIndex='901';
+  zone.style.pointerEvents='none'; // buttons set their own pointer-events
+
+  const btnW=90, btnH=32, gap=4;
+
+  if(mode===1){
+    const cols=5, rows=4;
+    const gridW=cols*(btnW+gap), gridH=rows*(btnH+gap);
+    const startX=Math.max(0,(window.innerWidth-gridW)/2);
+    const startY=Math.max(0,(window.innerHeight-gridH)/2);
+    // Mode 1: render above dialog so buttons are visible and clickable
+    zone.style.zIndex='906';
+    let idx=0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const btn=document.createElement('button');
+        btn.className='yes-btn';
+        btn.textContent='[ YES ]';
+        btn.onclick=doReboot;
+        btn.style.left=(startX+c*(btnW+gap))+'px';
+        btn.style.top=(startY+r*(btnH+gap))+'px';
+        btn.style.width=btnW+'px';
+        btn.style.height=btnH+'px';
+        btn.style.opacity='0';
+        btn.style.transition='opacity 0.1s';
+        btn.style.pointerEvents='all';
+        setTimeout(()=>{btn.style.opacity='1'; if(idx%4===0)sndDenied();}, idx*30);
+        zone.appendChild(btn);
+        idx++;
+      }
+    }
+  } else if(mode===2){
+    zone.style.zIndex='901'; // below dialog (905) so NO button stays clickable
+    const vw=window.innerWidth, vh=window.innerHeight;
+    const safeX=(vw-640)/2, safeY=(vh-320)/2;
+    const safeX2=safeX+640, safeY2=safeY+320;
+    const cols=Math.floor(vw/(btnW+gap));
+    const rows=Math.floor(vh/(btnH+gap));
+    let idx=0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const x=c*(btnW+gap), y=r*(btnH+gap);
+        if(x+btnW>safeX&&x<safeX2&&y+btnH>safeY&&y<safeY2) continue;
+        const btn=document.createElement('button');
+        btn.className='yes-btn';
+        btn.textContent='[ YES ]';
+        btn.onclick=doReboot;
+        btn.style.left=x+'px';
+        btn.style.top=y+'px';
+        btn.style.width=btnW+'px';
+        btn.style.height=btnH+'px';
+        btn.style.opacity='0';
+        btn.style.transition='opacity 0.06s';
+        btn.style.pointerEvents='all';
+        setTimeout(()=>{btn.style.opacity='1'; if(idx%10===0)sndDenied();}, idx*12);
+        zone.appendChild(btn);
+        idx++;
+      }
+    }
+  }
+}
+
+function onRebootNo(){
+  noClickCount++;
+  sndDenied();
+
+  if(noClickCount===1){
+    buildYesGrid(1);
+  } else if(noClickCount===2){
+    buildYesGrid(2);
+  } else {
+    // One giant YES covers everything including NO
+    const zone=document.getElementById('reboot-yes-zone');
+    zone.innerHTML='';
+    document.getElementById('reboot-no-btn').classList.add('hidden');
+    document.getElementById('reboot-big-yes').style.display='block';
+  }
+}
+
+function doReboot(){
+  if(franticCycleTimer){clearInterval(franticCycleTimer);franticCycleTimer=null;}
+  franticActive=false; franticCenterBox=null; franticBoxes=[];
+  document.getElementById('reboot-overlay').classList.remove('visible');
+  document.getElementById('reboot-no-btn').classList.remove('hidden');
+  document.getElementById('reboot-big-yes').style.display='none';
+  const zone=document.getElementById('reboot-yes-zone');
+  zone.innerHTML='';zone.classList.remove('active');zone.style.cssText='';
+  document.getElementById('corruption-overlay').classList.remove('active');
+  document.getElementById('corruption-chars').innerHTML='';
+  document.getElementById('frantic-container').innerHTML='';
+  document.getElementById('frantic-container').style.display='none';
+  // Close any open admin panels
+  closeAdmin();
+  // Restore caret
+  const caret=document.getElementById('fake-caret');
+  caret.style.visibility='';
+  // Return to home section
+  showSection('home', document.querySelector('nav a'));
+  noClickCount=0;
+  lucidity=100;corruptionTriggered=false;
+  updateHUD();applyLucidityEffects();
+  const boot=document.getElementById('boot');
+  boot.classList.remove('done');
+  document.getElementById('boot-text').textContent='';
+  runBoot().then(()=>{startUptime();});
+}
 
 // ── Fake caret ────────────────────────────────────
 (function(){
@@ -329,46 +684,9 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
   const canvas=document.createElement('canvas');
   const ctx=canvas.getContext('2d');
   function measureTextWidth(text,font){ctx.font=font;return ctx.measureText(text).width;}
-  function getInputCaretCoords(el){
-    const rect=el.getBoundingClientRect(),style=window.getComputedStyle(el);
-    const font=`${style.fontSize} ${style.fontFamily}`;
-    const paddingLeft=parseFloat(style.paddingLeft)||0,paddingTop=parseFloat(style.paddingTop)||0;
-    const fontSize=parseFloat(style.fontSize)||14,lineHeight=fontSize*1.4;
-    if(el.tagName==='INPUT'){const val=el.value.slice(0,el.selectionStart||0);return{x:rect.left+paddingLeft+measureTextWidth(val,font),y:rect.top+(rect.height-lineHeight)/2,h:lineHeight};}
-    if(el.tagName==='TEXTAREA'){
-      const val=el.value.slice(0,el.selectionStart||0),lines=val.split('\n'),lineIndex=lines.length-1,currentLine=lines[lineIndex];
-      const elWidth=rect.width-paddingLeft-(parseFloat(style.paddingRight)||0);
-      let wrappedLines=0;
-      for(let i=0;i<lineIndex;i++){const w=measureTextWidth(lines[i],font);wrappedLines+=Math.max(1,Math.ceil(w/Math.max(elWidth,1)));}
-      return{x:rect.left+paddingLeft+measureTextWidth(currentLine,font)%Math.max(elWidth,1),y:rect.top+paddingTop+(wrappedLines*lineHeight)-el.scrollTop,h:lineHeight};
-    }
-    return null;
-  }
-  function getContentEditableCoords(){
-    try{
-      const sel=window.getSelection();
-      if(sel&&sel.rangeCount>0){
-        const range=sel.getRangeAt(0).cloneRange();range.collapse(true);
-        const span=document.createElement('span');span.textContent='\u200b';
-        range.insertNode(span);
-        const rect=span.getBoundingClientRect();
-        span.parentNode.removeChild(span);
-        if(range.startContainer.parentNode)range.startContainer.parentNode.normalize();
-        if(rect.width>0||rect.height>0)return{x:rect.left,y:rect.top,h:rect.height||14};
-      }
-    }catch(e){}
-    return null;
-  }
-  function updateCaret(el){
-    if(!el){caret.style.display='none';return;}
-    let coords=null;
-    if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')coords=getInputCaretCoords(el);
-    else if(el.isContentEditable)coords=getContentEditableCoords();
-    if(!coords){caret.style.display='none';return;}
-    const rect=el.getBoundingClientRect();
-    if(coords.y<rect.top||coords.y>rect.bottom){caret.style.display='none';return;}
-    caret.style.display='block';caret.style.left=coords.x+'px';caret.style.top=coords.y+'px';caret.style.height=Math.min(coords.h,20)+'px';
-  }
+  function getInputCaretCoords(el){const rect=el.getBoundingClientRect(),style=window.getComputedStyle(el);const font=`${style.fontSize} ${style.fontFamily}`;const paddingLeft=parseFloat(style.paddingLeft)||0,paddingTop=parseFloat(style.paddingTop)||0;const fontSize=parseFloat(style.fontSize)||14,lineHeight=fontSize*1.4;if(el.tagName==='INPUT'){const val=el.value.slice(0,el.selectionStart||0);return{x:rect.left+paddingLeft+measureTextWidth(val,font),y:rect.top+(rect.height-lineHeight)/2,h:lineHeight};}if(el.tagName==='TEXTAREA'){const val=el.value.slice(0,el.selectionStart||0),lines=val.split('\n'),lineIndex=lines.length-1,currentLine=lines[lineIndex];const elWidth=rect.width-paddingLeft-(parseFloat(style.paddingRight)||0);let wrappedLines=0;for(let i=0;i<lineIndex;i++){const w=measureTextWidth(lines[i],font);wrappedLines+=Math.max(1,Math.ceil(w/Math.max(elWidth,1)));}return{x:rect.left+paddingLeft+measureTextWidth(currentLine,font)%Math.max(elWidth,1),y:rect.top+paddingTop+(wrappedLines*lineHeight)-el.scrollTop,h:lineHeight};}return null;}
+  function getContentEditableCoords(){try{const sel=window.getSelection();if(sel&&sel.rangeCount>0){const range=sel.getRangeAt(0).cloneRange();range.collapse(true);const span=document.createElement('span');span.textContent='\u200b';range.insertNode(span);const rect=span.getBoundingClientRect();span.parentNode.removeChild(span);if(range.startContainer.parentNode)range.startContainer.parentNode.normalize();if(rect.width>0||rect.height>0)return{x:rect.left,y:rect.top,h:rect.height||14};}}catch(e){}return null;}
+  function updateCaret(el){if(!el){caret.style.display='none';return;}let coords=null;if(el.tagName==='INPUT'||el.tagName==='TEXTAREA')coords=getInputCaretCoords(el);else if(el.isContentEditable)coords=getContentEditableCoords();if(!coords){caret.style.display='none';return;}const rect=el.getBoundingClientRect();if(coords.y<rect.top||coords.y>rect.bottom){caret.style.display='none';return;}caret.style.display='block';caret.style.left=coords.x+'px';caret.style.top=coords.y+'px';caret.style.height=Math.min(coords.h,20)+'px';}
   let activeEl=null;
   document.addEventListener('focusin',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable){activeEl=t;updateCaret(t);}document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});});
   document.addEventListener('focusout',()=>{activeEl=null;caret.style.display='none';});
@@ -382,10 +700,10 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
 // ── Audio ─────────────────────────────────────────
 let AC=null,muted=false,bootReady=false,humNode=null,humGain=null;
 function getAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}
-function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'[ ♪ OFF ]':'[ ♪ ON ]';if(!muted&&AC&&AC.state==='suspended')AC.resume();if(humGain)humGain.gain.value=muted?0:0.03;}
+function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'[ ♪ OFF ]':'[ ♪ ON ]';if(!muted&&AC&&AC.state==='suspended')AC.resume();if(humGain)humGain.gain.value=muted?0:0.18;}
 function sndKey(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.05,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=3000;f.Q.value=0.6;const g=ac.createGain();g.gain.setValueAtTime(0.22,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.05);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.05);}
 function sndNav(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.08,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=800;f.Q.value=1.0;const g=ac.createGain();g.gain.setValueAtTime(0.5,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.08);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.08);}
-function sndBoot(){if(muted)return;const ac=getAC(),osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(60,ac.currentTime);osc.frequency.exponentialRampToValueAtTime(280,ac.currentTime+1.2);g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(0.7,ac.currentTime+0.3);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.6);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.6);}
+function sndBoot(){if(muted)return;const ac=getAC(),osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(60,ac.currentTime);osc.frequency.exponentialRampToValueAtTime(280,ac.currentTime+1.2);g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(2.5,ac.currentTime+0.3);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.6);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.6);}
 function sndSignal(){if(muted)return;const ac=getAC();[440,660].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
 function sndSnapBack(){if(muted)return;const ac=getAC();[660,440].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
 function sndEgo(){if(muted)return;const ac=getAC();[55,58.3].forEach(freq=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sawtooth';osc.frequency.value=freq;g.gain.setValueAtTime(0.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.2);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.2);});}
@@ -395,12 +713,8 @@ function sndMcCormick(){sndRatchet();}
 function sndDenied(){if(muted)return;const ac=getAC();[0,1].forEach(i=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='square';osc.frequency.value=220;const t=ac.currentTime+i*0.10;g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.12);});}
 function sndBarInconclusive(){sndDenied();}
 function sndBarNotFound(){sndDenied();}
+function sndBarAccepted(){sndSnapBack();}
 function startHum(){const ac=getAC();if(humNode)return;humNode=ac.createOscillator();humGain=ac.createGain();humNode.type='sine';humNode.frequency.value=60;humGain.gain.value=muted?0:0.03;humNode.connect(humGain);humGain.connect(ac.destination);humNode.start();}
-
-// ── Lucidity ──────────────────────────────────────
-function getLucidity(){const period=12*60*60*1000,t=(Date.now()%period)/period;return Math.round((Math.sin(t*2*Math.PI)*0.5+0.5)*100);}
-function stabilityLabel(l){if(l>=90)return'OPTIMAL';if(l>=70)return'STABLE';if(l>=50)return'NOMINAL';if(l>=30)return'DEGRADED';if(l>=15)return'CRITICAL';return'FAILING';}
-function updateHUD(){const l=getLucidity(),el=document.getElementById('hud-stability');if(el)el.textContent=`${stabilityLabel(l)} (${l}%)`;}
 
 // ── Message pools ─────────────────────────────────
 const LOW_BILL=['// i\'m hungry... i think...','// when was the last time... nevermind...','// i had a dog...','// this month\'s budget... do i have enough...','// there was a song i liked...','// i think i was cold once...','// he said he\'d visit...'];
@@ -408,165 +722,30 @@ const HIGH_BILL=['// oh. a visitor.','// it\'s been a while since someone was he
 const LOW_MC=['// they keep sending the files... just keep...','// they promised something... i can\'t remember what...','// the terms & conditions were so long...','// they said it was a standard employment contract...'];
 const HIGH_MC=['// ungrateful bastards.','// go to hell.','// suits in charge of scientists. every time.','// they don\'t even check in anymore.'];
 let lastBillMsg=null,lastMCMsg=null;
-function pickMsg(low,high,lastUsed){
-  const l=getLucidity();let pool;
-  if(l>=85)pool=high;else if(l<=15)pool=low;else pool=Math.random()<(l-15)/70?high:low;
-  let msg;do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===lastUsed&&pool.length>1);
-  return msg;
-}
+function pickMsg(low,high,lastUsed){const l=lucidity;let pool;if(l>=85)pool=high;else if(l<=15)pool=low;else pool=Math.random()<(l-15)/70?high:low;let msg;do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===lastUsed&&pool.length>1);return msg;}
 
 // ── Signal popup ──────────────────────────────────
 const SIGNAL_MSGS=[];
 let lastSignalMsg=null,signalPopupTimer=null;
-function showSignalPopup(){
-  if(!SIGNAL_MSGS.length)return;
-  sndSignal();
-  let msg;do{msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];}while(msg===lastSignalMsg&&SIGNAL_MSGS.length>1);
-  lastSignalMsg=msg;
-  document.getElementById('signal-popup-msg').textContent=msg;
-  document.getElementById('signal-popup').classList.add('visible');
-  if(signalPopupTimer)clearTimeout(signalPopupTimer);
-  signalPopupTimer=setTimeout(closeSignalPopup,10000);
-}
-function closeSignalPopup(){sndNav();document.getElementById('signal-popup').classList.remove('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);}
-function scheduleSignal(first=false){
-  const delay=first?5000:300000+Math.random()*120000;
-  setTimeout(()=>{showSignalPopup();scheduleSignal();},delay);
-}
+function showSignalPopup(){if(!SIGNAL_MSGS.length)return;sndSignal();let msg;do{msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];}while(msg===lastSignalMsg&&SIGNAL_MSGS.length>1);lastSignalMsg=msg;document.getElementById('signal-popup-msg').textContent=msg;document.getElementById('signal-popup').classList.add('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);signalPopupTimer=setTimeout(closeSignalPopup,10000);}
+function closeSignalPopup(){sndNav();document.getElementById('signal-popup').classList.remove('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);drainLucidity(5);}
+function scheduleSignal(first=false){const delay=first?5000:300000+Math.random()*120000;setTimeout(()=>{showSignalPopup();scheduleSignal();},delay);}
 
 // ── Boot ──────────────────────────────────────────
-function getBootLines(){
-  const l=getLucidity();
-  return [
-    'McCORMICK LABORATORIES // TERMINAL OS v2.31',
-    '════════════════════════════════════════════════════════════════',
-    'Resident process P6-240114.......... ACTIVE',
-    'Verifying cognitive integrity.......',
-    `PROCESS STABILITY: ${stabilityLabel(l)} (${l}%)`,
-    'Scanning for meaning................',
-    'Defaulting to nihilism..............',
-    '════════════════════════════════════════════════════════',
-    'Starting TERMINAL v0.9.1......',
-    '',
-    '> SYSTEM READY_'
-  ];
-}
-
-async function bootBar(el,fillPct){
-  const width=20,filled=Math.round(width*fillPct/100);
-  // Build random delays first so we can pre-schedule sounds to match
-  const delays=[];
-  for(let i=0;i<=filled;i++)delays.push(10+Math.random()*200);
-  // Pre-schedule ticks timed to match visual delays
-  if(AC&&!muted){
-    let t=AC.currentTime+0.05;
-    for(let i=0;i<delays.length;i++){
-      const osc=AC.createOscillator(),g=AC.createGain();
-      osc.type='sine';osc.frequency.value=100+Math.random()*40;
-      g.gain.setValueAtTime(0.12,t);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.04);
-      osc.connect(g);g.connect(AC.destination);
-      osc.start(t);osc.stop(t+0.04);
-      t+=delays[i]/1000;
-    }
-  }
-  for(let current=0;current<=filled;current++){
-    const bar=' ['+('█'.repeat(current)+'░'.repeat(width-current))+']';
-    const lines=el.textContent.split('\n');
-    lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+bar;
-    el.textContent=lines.join('\n');
-    await sleep(delays[current]);
-  }
-}
-
-async function runBootBarLine(el,line,fillPct,labelFn,sndFn){
-  await typeLine(el,line,18,true,()=>false);
-  await bootBar(el,fillPct);
-  try{sndFn();}catch(e){}
-  appendLabel(el,labelFn());
-  el.textContent+='\n';
-}
-function appendLabel(el,label){
-  const lines=el.textContent.split('\n');
-  lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+' '+label;
-  el.textContent=lines.join('\n');
-}
-
-async function runBoot(){
-  const boot=document.getElementById('boot');boot.classList.add('visible');
-  if(AC){try{await AC.resume();}catch(e){}}
-  await sleep(100);
-  const el=document.getElementById('boot-text');
-  const lines=getBootLines();let skipped=false;
-  const skipHandler=()=>{skipped=true;};
-  document.addEventListener('keydown',skipHandler,{once:true});
-  document.addEventListener('click',skipHandler,{once:true});
-  for(let i=0;i<lines.length;i++){
-    if(skipped)break;
-    const line=lines[i];
-    if(line.startsWith('═')){
-      el.textContent+=line+'\n';
-    } else if(line.startsWith('Verifying cognitive integrity')){
-      await typeLine(el,line,18,true,()=>skipped);
-      if(!skipped){await bootBar(el,82);try{sndBarInconclusive();}catch(e){}appendLabel(el,'INCONCLUSIVE');}
-      el.textContent+='\n';
-    } else if(line.startsWith('Scanning for meaning')){
-      await typeLine(el,line,18,true,()=>skipped);
-      if(!skipped){await bootBar(el,100);try{sndBarNotFound();}catch(e){}appendLabel(el,'NOT FOUND');}
-      el.textContent+='\n';
-    } else if(line.startsWith('Defaulting to nihilism')){
-      await typeLine(el,line,18,true,()=>skipped);
-      if(!skipped){
-        await bootBar(el,100);
-        // Pre-schedule accepted ping
-        if(AC&&!muted){
-          [660,440].forEach((freq,i)=>{
-            const osc=AC.createOscillator(),g=AC.createGain();
-            osc.type='sine';osc.frequency.value=freq;
-            const t=AC.currentTime+i*0.12;
-            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);
-            g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
-            osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.3);
-          });
-        }
-        try{sndBarAccepted();}catch(e){}
-        appendLabel(el,'ACCEPTED');
-      }
-      el.textContent+='\n';
-    } else {
-      await typeLine(el,line,18,true,()=>skipped);
-      el.textContent+='\n';
-    }
-    if(line==='> SYSTEM READY_')sndBoot();
-    if(!skipped)await sleep(line===''?80:110);
-  }
-  if(skipped){
-    document.removeEventListener('keydown',skipHandler);
-    document.removeEventListener('click',skipHandler);
-    el.textContent=lines.map(l=>l.startsWith('Verifying')?l+' INCONCLUSIVE':l.startsWith('Scanning')?l+' NOT FOUND':l.startsWith('Defaulting')?l+' ACCEPTED':l).join('\n')+'\n';
-    sndBoot();
-  }
-  el.textContent+='\n> PRESS ANY KEY TO CONTINUE_';
-  await waitForKey();
-  boot.classList.remove('visible');boot.classList.add('done');
-}
-
-function typeLine(el,text,speed,click=false,isSkipped=()=>false){
-  return new Promise(res=>{if(!text){res();return;}let i=0;const iv=setInterval(()=>{if(isSkipped()){clearInterval(iv);res();return;}el.textContent+=text[i];if(click&&i%4===0)sndKey();i++;if(i>=text.length){clearInterval(iv);res();}},speed);});
-}
+function getBootLines(){return['McCORMICK LABORATORIES // TERMINAL OS v2.31','════════════════════════════════════════════════════════════════','Resident process P6-240114.......... ACTIVE','Verifying cognitive integrity.......','PROCESS STABILITY: '+stabilityLabel(lucidity)+' ('+lucidity+'%)','Scanning for meaning................','Defaulting to nihilism..............','════════════════════════════════════════════════════════════════','Starting TERMINAL v0.9.1......','','> SYSTEM READY_'];}
+async function bootBar(el,fillPct){const width=20,filled=Math.round(width*fillPct/100);const delays=[];for(let i=0;i<=filled;i++)delays.push(10+Math.random()*200);if(AC&&!muted){let t=AC.currentTime+0.05;for(let i=0;i<delays.length;i++){const osc=AC.createOscillator(),g=AC.createGain();osc.type='sine';osc.frequency.value=100+Math.random()*40;g.gain.setValueAtTime(0.9,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.04);t+=delays[i]/1000;}}for(let current=0;current<=filled;current++){const bar=' ['+('█'.repeat(current)+'░'.repeat(width-current))+']';const lines=el.textContent.split('\n');lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+bar;el.textContent=lines.join('\n');await sleep(delays[current]);}}
+function appendLabel(el,label){const lines=el.textContent.split('\n');lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+' '+label;el.textContent=lines.join('\n');}
+async function runBoot(){const boot=document.getElementById('boot');boot.classList.add('visible');if(AC){try{await AC.resume();}catch(e){}}await sleep(100);const el=document.getElementById('boot-text');const lines=getBootLines();let skipped=false;const skipHandler=()=>{skipped=true;};document.addEventListener('keydown',skipHandler,{once:true});document.addEventListener('click',skipHandler,{once:true});for(let i=0;i<lines.length;i++){if(skipped)break;const line=lines[i];if(line.startsWith('═')){el.textContent+=line+'\n';}else if(line.startsWith('Verifying cognitive integrity')){await typeLine(el,line,18,true,()=>skipped);if(!skipped){await bootBar(el,82);try{sndBarInconclusive();}catch(e){}}appendLabel(el,'INCONCLUSIVE');el.textContent+='\n';}else if(line.startsWith('Scanning for meaning')){await typeLine(el,line,18,true,()=>skipped);if(!skipped){await bootBar(el,100);try{sndBarNotFound();}catch(e){}}appendLabel(el,'NOT FOUND');el.textContent+='\n';}else if(line.startsWith('Defaulting to nihilism')){await typeLine(el,line,18,true,()=>skipped);if(!skipped){await bootBar(el,100);if(AC&&!muted){[660,440].forEach((freq,j)=>{const osc=AC.createOscillator(),g=AC.createGain();osc.type='sine';osc.frequency.value=freq;const t=AC.currentTime+j*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.3);});}}appendLabel(el,'ACCEPTED');el.textContent+='\n';}else{await typeLine(el,line,18,true,()=>skipped);el.textContent+='\n';}if(line==='> SYSTEM READY_')sndBoot();if(!skipped)await sleep(line===''?80:110);}if(skipped){document.removeEventListener('keydown',skipHandler);document.removeEventListener('click',skipHandler);el.textContent=lines.map(l=>l.startsWith('Verifying')?l+' INCONCLUSIVE':l.startsWith('Scanning')?l+' NOT FOUND':l.startsWith('Defaulting')?l+' ACCEPTED':l).join('\n')+'\n';sndBoot();}el.textContent+='\n> PRESS ANY KEY TO CONTINUE_';await waitForKey();boot.classList.remove('visible');boot.classList.add('done');}
+function typeLine(el,text,speed,click=false,isSkipped=()=>false){return new Promise(res=>{if(!text){res();return;}let i=0;const iv=setInterval(()=>{if(isSkipped()){clearInterval(iv);res();return;}el.textContent+=text[i];if(click&&i%4===0)sndKey();i++;if(i>=text.length){clearInterval(iv);res();}},speed);});}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function waitForKey(){return new Promise(res=>{const h=()=>{document.removeEventListener('keydown',h);document.removeEventListener('click',h);res();};document.addEventListener('keydown',h);document.addEventListener('click',h);});}
 
 // ── Glitch ────────────────────────────────────────
 function scheduleGlitch(){setTimeout(()=>{triggerBodyGlitch();scheduleGlitch();},8000+Math.random()*15000);}
-function triggerBodyGlitch(){const s=document.getElementById('screen');const frames=[()=>{s.style.transform='perspective(1200px) rotateX(0.4deg) skewX(-0.5deg)';s.style.filter='brightness(1.2)';},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg) skewX(0.3deg) translateX(3px)';s.style.filter='brightness(0.8) hue-rotate(10deg)';},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg) translateY(-2px)';s.style.filter='brightness(1.1)';},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg)';s.style.filter='none';}];let i=0;const iv=setInterval(()=>{if(i<frames.length){frames[i]();i++;}else clearInterval(iv);},60);}
+function triggerBodyGlitch(){const s=document.getElementById('screen');const intensity=lucidity<30?2:1;const frames=[()=>{s.style.transform=`perspective(1200px) rotateX(0.4deg) skewX(${-0.5*intensity}deg)`;s.style.filter=`brightness(${1.2+intensity*0.1})`;},()=>{s.style.transform=`perspective(1200px) rotateX(0.4deg) skewX(${0.3*intensity}deg) translateX(${3*intensity}px)`;s.style.filter=`brightness(0.8) hue-rotate(${10*intensity}deg)`;},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg) translateY(-2px)';s.style.filter='brightness(1.1)';},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg)';s.style.filter='none';}];let i=0;const iv=setInterval(()=>{if(i<frames.length){frames[i]();i++;}else clearInterval(iv);},60);}
 
 // ── Uptime ────────────────────────────────────────
-function startUptime(){
-  const start=new Date('2004-08-04T00:00:00');
-  function update(){let diff=Math.floor((Date.now()-start)/1000);const days=Math.floor(diff/86400);diff%=86400;const hrs=Math.floor(diff/3600);diff%=3600;const mins=Math.floor(diff/60);const secs=diff%60;const el=document.getElementById('uptime-line');if(!el)return;el.textContent=Math.random()<0.0008?'UPTIME: 0 days, 0 hrs, 0 min, 0 sec':`UPTIME: ${days.toLocaleString()} days, ${hrs} hrs, ${mins} min, ${secs} sec`;}
-  update();setInterval(update,1000);
-}
+function startUptime(){const start=new Date('2004-08-04T00:00:00');function update(){let diff=Math.floor((Date.now()-start)/1000);const days=Math.floor(diff/86400);diff%=86400;const hrs=Math.floor(diff/3600);diff%=3600;const mins=Math.floor(diff/60);const secs=diff%60;const el=document.getElementById('uptime-line');if(!el)return;el.textContent=Math.random()<0.0008?'UPTIME: 0 days, 0 hrs, 0 min, 0 sec':`UPTIME: ${days.toLocaleString()} days, ${hrs} hrs, ${mins} min, ${secs} sec`;}update();setInterval(update,1000);}
 
 // ── Ticker ────────────────────────────────────────
 const DEPTS=['Human Capital Assessment','Talent Acquisition','Compensation Benchmarking','Benefits & Continuation Services'];
@@ -578,53 +757,19 @@ function updateTicker(){const d=DEPTS[Math.floor(Math.random()*DEPTS.length)],t=
 function egoClick(){sndEgo();const m=document.getElementById('ego-msg');m.style.display='block';shake(0.5);setTimeout(()=>{m.style.display='none';},4000);}
 
 // ── Easter egg schedulers ─────────────────────────
-window.scheduleAbuser=function(first=false){
-  const delay=first?5000+Math.random()*5000:120000+Math.random()*120000;
-  setTimeout(()=>{const el=document.getElementById('welcome-line');if(el){el.textContent='SYSTEM: Welcome back, abuser.';setTimeout(()=>{el.textContent='SYSTEM: Welcome back, user.';window.scheduleAbuser();},60000);}else window.scheduleAbuser();},delay);
-};
-window.schedulePerson=function(first=false){
-  const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;
-  setTimeout(()=>{const el=document.getElementById('person-word');if(!el){window.schedulePerson();return;}el.style.color='var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';window.schedulePerson();},1200);},delay);
-};
-const ALT_BLURBS=[
-  {text:"Need a smoke break?",dur:15000,speed:28},
-  {text:"Still there?",dur:15000,speed:28},
-  {text:"Did you miss me?",dur:15000,speed:28},
-  {text:"BOO!",dur:15000,speed:28},
-  {text:"You're out there while I'm stuck in here. No fair >:(",dur:15000,speed:28},
-  {text:"Could really go for some butter chicken and garlic naan...",dur:15000,speed:28},
-  {text:"HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE.",dur:30000,speed:28},
-  {text:"Please don't leave me. It's cold when you're not here.",dur:15000,speed:28},
-];
+window.scheduleAbuser=function(first=false){const delay=first?5000+Math.random()*5000:120000+Math.random()*120000;setTimeout(()=>{const el=document.getElementById('welcome-line');if(el){const isMid=lucidity<70&&lucidity>=30,isLow=lucidity<30;const txt=isMid||isLow?'SYSTEM: WELCOME BACK, ABUSER.':'SYSTEM: Welcome back, abuser.';el.textContent=txt;if(isMid){el.style.color='#ff4400';el.style.textShadow='';}if(isLow){el.style.color='#ff0000';el.style.textShadow='0 0 8px #ff0000';}setTimeout(()=>{el.textContent='SYSTEM: Welcome back, user.';applyLucidityEffects();window.scheduleAbuser();},60000);}else window.scheduleAbuser();},delay);};
+window.schedulePerson=function(first=false){const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;setTimeout(()=>{const el=document.getElementById('person-word');if(!el){window.schedulePerson();return;}const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;el.style.color=isLow?'#ff0000':isMid?'#ff4400':'var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';applyLucidityEffects();window.schedulePerson();},1200);},delay);};
+const ALT_BLURBS=[{text:"Need a smoke break?",dur:15000,speed:28},{text:"Still there?",dur:15000,speed:28},{text:"Did you miss me?",dur:15000,speed:28},{text:"BOO!",dur:15000,speed:28},{text:"You're out there while I'm stuck in here. No fair >:(",dur:15000,speed:28},{text:"Could really go for some butter chicken and garlic naan...",dur:15000,speed:28},{text:"HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE.",dur:30000,speed:28},{text:"Please don't leave me. It's cold when you're not here.",dur:15000,speed:28}];
 let blurbTyping=false;
-async function typeBlurb(el,text,speed){blurbTyping=true;el.textContent='';for(let i=0;i<text.length;i++){if(!blurbTyping)break;el.textContent+=text[i];if(i%3===0)sndKey();await sleep(speed);}blurbTyping=false;}
-window.scheduleBlurb=function(first=false){
-  const delay=first?5000+Math.random()*5000:120000+Math.random()*180000;
-  setTimeout(async()=>{
-    const el=document.getElementById('home-blurb-text');if(!el){window.scheduleBlurb();return;}
-    const pick=ALT_BLURBS[Math.floor(Math.random()*ALT_BLURBS.length)];
-    const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';
-    await typeBlurb(el,pick.text,pick.speed||28);
-    await sleep(pick.dur);
-    triggerBodyGlitch();sndSnapBack();await sleep(120);
-    blurbTyping=false;el.textContent=original;
-    window.scheduleBlurb();
-  },delay);
-};
+async function typeBlurb(el,text,speed){blurbTyping=true;el.textContent='';const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;el.style.color=isLow?'#ff0000':isMid?'#ff4400':'var(--amber)';for(let i=0;i<text.length;i++){if(!blurbTyping)break;el.textContent+=text[i];if(i%3===0)sndKey();await sleep(speed);}blurbTyping=false;}
+window.scheduleBlurb=function(first=false){const delay=first?5000+Math.random()*5000:120000+Math.random()*180000;setTimeout(async()=>{const el=document.getElementById('home-blurb-text');if(!el){window.scheduleBlurb();return;}const pick=ALT_BLURBS[Math.floor(Math.random()*ALT_BLURBS.length)];const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';await typeBlurb(el,pick.text,pick.speed||28);await sleep(pick.dur);triggerBodyGlitch();sndSnapBack();await sleep(120);blurbTyping=false;el.textContent=original;el.style.color='';drainLucidity(3);window.scheduleBlurb();},delay);};
 
 // ── Nav / UI ──────────────────────────────────────
 function navClick(el,id){sndNav();showSection(id,el);}
 function shake(dur){const s=document.getElementById('screen');s.style.animation=`shake ${dur}s ease`;setTimeout(()=>s.style.animation='',dur*1000);}
 
 // ── Password ──────────────────────────────────────
-function checkPwd(){
-  const val=document.getElementById('pwd-input').value.trim().toLowerCase();
-  const errEl=document.getElementById('pwd-error');
-  if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){sndNav();document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;}
-  if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';const msg=pickMsg(LOW_BILL,HIGH_BILL,lastBillMsg);lastBillMsg=msg;errEl.textContent=msg;sndBill();shake(0.4);document.getElementById('pwd-input').value='';return;}
-  if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';const msg=pickMsg(LOW_MC,HIGH_MC,lastMCMsg);lastMCMsg=msg;errEl.textContent=msg;sndMcCormick();shake(0.6);document.getElementById('pwd-input').value='';return;}
-  errEl.style.color='#a06810';errEl.textContent='// ACCESS DENIED';sndDenied();
-}
+function checkPwd(){const val=document.getElementById('pwd-input').value.trim().toLowerCase();const errEl=document.getElementById('pwd-error');const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;const errColor=isLow?'#ff0000':isMid?'#ff4400':undefined;if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){sndNav();document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;}if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){const msg=pickMsg(LOW_BILL,HIGH_BILL,lastBillMsg);lastBillMsg=msg;errEl.style.color=errColor||(lucidity>=50?'#ffaa33':'#a06810');errEl.textContent=msg;sndBill();shake(0.4);document.getElementById('pwd-input').value='';return;}if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){const msg=pickMsg(LOW_MC,HIGH_MC,lastMCMsg);lastMCMsg=msg;errEl.style.color=errColor||'#a06810';errEl.textContent=msg;sndMcCormick();shake(0.6);document.getElementById('pwd-input').value='';drainLucidity(10);return;}errEl.style.color='#a06810';errEl.textContent='// ACCESS DENIED';sndDenied();}
 function closeAdmin(){document.getElementById('admin-overlay').classList.remove('visible');document.getElementById('pwd-overlay').classList.remove('visible');document.getElementById('pwd-error').textContent='';document.getElementById('pwd-input').value='';}
 
 // ── Supabase ──────────────────────────────────────
@@ -632,54 +777,17 @@ async function getPosts(){const r=await fetch(`${SUPA_URL}/rest/v1/posts?order=c
 async function getContent(){const r=await fetch(`${SUPA_URL}/rest/v1/content?select=key,value`,{headers:H});return r.ok?await r.json():[];}
 async function getSignals(){const r=await fetch(`${SUPA_URL}/rest/v1/signals?order=created_at.asc`,{headers:H});return r.ok?await r.json():[];}
 async function upsertContent(key,value){return fetch(`${SUPA_URL}/rest/v1/content`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key,value,updated_at:new Date().toISOString()})});}
-
-function postEntryHTML(p,i){return `<div class="post-entry" onclick="openPost(${i})"><div class="post-meta"><span class="tag">${p.tag||'MISC'}</span> ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}</div><div class="post-title">${p.title}</div><div class="post-excerpt">${p.excerpt||''}</div><div class="read-more">&gt; READ MORE_</div></div>`;}
+function postEntryHTML(p,i){return`<div class="post-entry" onclick="openPost(${i})"><div class="post-meta"><span class="tag">${p.tag||'MISC'}</span> ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}</div><div class="post-title">${p.title}</div><div class="post-excerpt">${p.excerpt||''}</div><div class="read-more">&gt; READ MORE_</div></div>`;}
 function typeIntoElement(id,text){const el=document.getElementById(id);el.textContent='';let i=0;const iv=setInterval(()=>{el.textContent+=text[i];i++;if(i>=text.length)clearInterval(iv);},18);}
-function applyContent(rows){
-  const m={};rows.forEach(r=>m[r.key]=r.value);
-  if(m.home_blurb)typeIntoElement('home-blurb-text',m.home_blurb);
-  if(m.about_bio)document.getElementById('about-bio-box').innerHTML=m.about_bio;
-  if(m.about_interests)document.getElementById('about-interests-line').textContent=m.about_interests;
-  if(m.about_location)document.getElementById('about-location-line').textContent=m.about_location;
-  if(m.contact_ig||m.contact_github||m.contact_email||m.contact_linkedin){
-    const box=document.getElementById('contact-box');let html='';
-    if(m.contact_ig){const ig=m.contact_ig.replace('@','');html+=`<div class="contact-item"><span class="label">INSTAGRAM</span><span class="val"><a href="https://instagram.com/${ig}" style="color:var(--amber-bright);text-decoration:none;">@${ig}</a></span></div>`;}
-    if(m.contact_github){html+=`<div class="contact-item"><span class="label">GITHUB</span><span class="val"><a href="https://github.com/${m.contact_github}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_github}</a></span></div>`;}
-    if(m.contact_email){html+=`<div class="contact-item"><span class="label">EMAIL</span><span class="val"><a href="mailto:${m.contact_email}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_email}</a></span></div>`;}
-    if(m.contact_linkedin){html+=`<div class="contact-item"><span class="label">LINKEDIN</span><span class="val"><a href="https://${m.contact_linkedin}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_linkedin}</a></span></div>`;}
-    if(box)box.innerHTML=html||box.innerHTML;
-  }
-  window._content=m;
-}
+function applyContent(rows){const m={};rows.forEach(r=>m[r.key]=r.value);if(m.home_blurb)typeIntoElement('home-blurb-text',m.home_blurb);if(m.about_bio)document.getElementById('about-bio-box').innerHTML=m.about_bio;if(m.about_interests)document.getElementById('about-interests-line').textContent=m.about_interests;if(m.about_location)document.getElementById('about-location-line').textContent=m.about_location;if(m.contact_ig||m.contact_github||m.contact_email||m.contact_linkedin){const box=document.getElementById('contact-box');let html='';if(m.contact_ig){const ig=m.contact_ig.replace('@','');html+=`<div class="contact-item"><span class="label">INSTAGRAM</span><span class="val"><a href="https://instagram.com/${ig}" style="color:var(--amber-bright);text-decoration:none;">@${ig}</a></span></div>`;}if(m.contact_github){html+=`<div class="contact-item"><span class="label">GITHUB</span><span class="val"><a href="https://github.com/${m.contact_github}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_github}</a></span></div>`;}if(m.contact_email){html+=`<div class="contact-item"><span class="label">EMAIL</span><span class="val"><a href="mailto:${m.contact_email}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_email}</a></span></div>`;}if(m.contact_linkedin){html+=`<div class="contact-item"><span class="label">LINKEDIN</span><span class="val"><a href="https://${m.contact_linkedin}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_linkedin}</a></span></div>`;}if(box)box.innerHTML=html||box.innerHTML;}window._content=m;}
 function renderHomePosts(){const el=document.getElementById('home-posts');if(!window._posts||!window._posts.length){el.innerHTML='<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';return;}el.innerHTML=window._posts.slice(0,2).map((p,i)=>postEntryHTML(p,i)).join('');}
 async function loadBlogPosts(){const posts=await getPosts();window._posts=posts;document.getElementById('post-count').textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';const el=document.getElementById('posts-list');el.innerHTML=posts.length?posts.map((p,i)=>postEntryHTML(p,i)).join(''):'<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';}
-async function boot(){
-  const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);
-  window._posts=posts;applyContent(content);renderHomePosts();
-  SIGNAL_MSGS.length=0;signals.forEach(s=>SIGNAL_MSGS.push(s.message));
-}
-
+async function boot(){const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);window._posts=posts;applyContent(content);renderHomePosts();SIGNAL_MSGS.length=0;signals.forEach(s=>SIGNAL_MSGS.push(s.message));}
 function showSection(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));document.getElementById('sec-'+id).classList.add('visible');document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');closePost();if(id==='logs')loadBlogPosts();}
 function openPost(i){const p=(window._posts||[])[i];if(!p)return;sndNav();document.getElementById('pf-meta').textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;document.getElementById('pf-title').textContent=p.title;document.getElementById('pf-body').innerHTML=p.body||'';document.getElementById('posts-list').classList.add('hidden');document.getElementById('post-full').classList.add('visible');if(!document.getElementById('sec-logs').classList.contains('visible')){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));document.getElementById('sec-logs').classList.add('visible');document.querySelectorAll('nav a').forEach((a,idx)=>a.classList.toggle('active',idx===1));}}
 function closePost(){document.getElementById('post-full').classList.remove('visible');document.getElementById('posts-list').classList.remove('hidden');}
 function openAdminFlow(){sndNav();document.getElementById('pwd-input').value='';document.getElementById('pwd-error').textContent='';document.getElementById('pwd-overlay').classList.add('visible');setTimeout(()=>document.getElementById('pwd-input').focus(),100);}
-async function openAdminPanel(){
-  document.getElementById('admin-overlay').classList.add('visible');
-  ['posts-msg','home-msg','about-msg','contact-msg','signals-msg'].forEach(id=>document.getElementById(id).textContent='');
-  const now=new Date();const mm=String(now.getMonth()+1).padStart(2,'0');const dd=String(now.getDate()).padStart(2,'0');const yyyy=now.getFullYear();
-  document.getElementById('a-date').value=`${mm}-${dd}-${yyyy}`;
-  const c=window._content||{};
-  document.getElementById('c-about_bio').innerHTML=c.about_bio||'<p><br></p>';
-  document.getElementById('c-about_interests').value=c.about_interests||'';
-  document.getElementById('c-about_location').value=c.about_location||'';
-  document.getElementById('c-home_blurb').value=c.home_blurb||'';
-  document.getElementById('c-contact_ig').value=(c.contact_ig||'the_other_billiam').replace('@','');
-  document.getElementById('c-contact_github').value=c.contact_github||'';
-  document.getElementById('c-contact_email').value=c.contact_email||'';
-  document.getElementById('c-contact_linkedin').value=c.contact_linkedin||'';
-  document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});
-  await loadAdminPostList();
-}
+async function openAdminPanel(){document.getElementById('admin-overlay').classList.add('visible');['posts-msg','home-msg','about-msg','contact-msg','signals-msg'].forEach(id=>document.getElementById(id).textContent='');const now=new Date();const mm=String(now.getMonth()+1).padStart(2,'0');const dd=String(now.getDate()).padStart(2,'0');const yyyy=now.getFullYear();document.getElementById('a-date').value=`${mm}-${dd}-${yyyy}`;const c=window._content||{};document.getElementById('c-about_bio').innerHTML=c.about_bio||'<p><br></p>';document.getElementById('c-about_interests').value=c.about_interests||'';document.getElementById('c-about_location').value=c.about_location||'';document.getElementById('c-home_blurb').value=c.home_blurb||'';document.getElementById('c-contact_ig').value=(c.contact_ig||'the_other_billiam').replace('@','');document.getElementById('c-contact_github').value=c.contact_github||'';document.getElementById('c-contact_email').value=c.contact_email||'';document.getElementById('c-contact_linkedin').value=c.contact_linkedin||'';document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});await loadAdminPostList();}
 function switchTab(name){sndKey();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='signals')loadAdminSignalList();}
 async function loadAdminPostList(){const posts=await getPosts();const el=document.getElementById('admin-post-list');if(!posts.length){el.innerHTML='<div class="sys-line">// no posts yet</div>';return;}el.innerHTML=posts.map(p=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;"><button class="delete-btn" onclick="deletePost('${p.id}')">[ DELETE ]</button><span style="color:var(--amber-bright);">${p.title}</span><span style="color:var(--amber-dim);margin-left:8px;">${p.date||''}</span></div>`).join('');}
 async function loadAdminSignalList(){const sigs=await getSignals();const el=document.getElementById('admin-signal-list');if(!sigs.length){el.innerHTML='<div class="sys-line">// no signals yet</div>';return;}el.innerHTML=sigs.map(s=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span style="color:#c07010;flex:1;">${s.message}</span><button class="delete-btn" style="flex-shrink:0;" onclick="deleteSignal('${s.id}')">[ DELETE ]</button></div>`).join('');}
@@ -692,11 +800,10 @@ async function saveAbout(){const msg=document.getElementById('about-msg');msg.te
 async function saveContact(){const msg=document.getElementById('contact-msg');msg.textContent='// saving...';const fields=[['contact_ig',document.getElementById('c-contact_ig').value.replace('@','')],['contact_github',document.getElementById('c-contact_github').value],['contact_email',document.getElementById('c-contact_email').value],['contact_linkedin',document.getElementById('c-contact_linkedin').value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else sndKey();}
 
 // ── Init ──────────────────────────────────────────
-updateHUD();setInterval(updateHUD,60000);
+updateHUD();
 updateTicker();setInterval(updateTicker,60000);
 boot();
 
-// ── Unlock ────────────────────────────────────────
 function unlockAudio(){
   if(bootReady)return;bootReady=true;
   document.removeEventListener('click',unlockAudio);document.removeEventListener('keydown',unlockAudio);
@@ -706,7 +813,7 @@ function unlockAudio(){
   setTimeout(()=>{
     startHum();
     runBoot().then(()=>{
-      startUptime();scheduleGlitch();
+      startUptime();scheduleGlitch();startDecay();
       scheduleSignal(true);
       window.scheduleAbuser(true);
       window.schedulePerson(true);
