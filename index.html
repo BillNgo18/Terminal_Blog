@@ -32,6 +32,12 @@
   #mute-btn{position:fixed;top:calc(var(--ticker-h) + 0.6rem);left:1.2rem;z-index:490;font-size:11px;color:var(--amber-dim);letter-spacing:0.08em;cursor:pointer;background:none;border:1px solid var(--amber-dim);font-family:'Courier Prime',monospace;padding:2px 8px;}
   #mute-btn:hover{background:var(--amber-dim);color:var(--bg);}
   #fake-caret{position:fixed;width:2px;height:1.1em;background:var(--amber-bright);pointer-events:none;z-index:9999;animation:blink 0.7s step-end infinite;display:none;}
+  #signal-popup{position:fixed;bottom:1.5rem;left:1.5rem;z-index:550;background:var(--bg2);border:1px solid #c07010;padding:1rem 1.2rem;max-width:400px;min-width:340px;font-size:12px;color:#c07010;display:none;letter-spacing:0.05em;line-height:1.6;}
+  #signal-popup.visible{display:block;}
+  #signal-popup .popup-header{font-size:10px;color:var(--amber-dim);margin-bottom:0.4rem;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:flex-start;white-space:nowrap;}
+  #signal-popup .popup-close{cursor:pointer;color:var(--amber-dim);font-size:11px;flex-shrink:0;margin-left:0.8rem;}
+  #signal-popup .popup-close:hover{color:var(--amber);}
+  #signal-popup .popup-msg{color:#c07010;}
   @keyframes glitch1{0%,95%{clip-path:inset(0 0 100% 0);transform:translate(0)}96%{clip-path:inset(30% 0 40% 0);transform:translate(-4px,1px);color:var(--amber-bright);}97%{clip-path:inset(60% 0 10% 0);transform:translate(3px,-2px);color:#ff6600;}98%{clip-path:inset(10% 0 70% 0);transform:translate(-2px,3px);}100%{clip-path:inset(0 0 100% 0);transform:translate(0);}}
   @keyframes glitch2{0%,97%{opacity:0;}97.5%{opacity:1;clip-path:inset(45% 0 30% 0);transform:translate(5px,-1px);color:#ff4400;}98.5%{opacity:1;clip-path:inset(20% 0 55% 0);transform:translate(-3px,2px);}99%{opacity:0;}}
   @keyframes blink{50%{opacity:0;}}
@@ -75,14 +81,13 @@
   .contact-item .val{color:var(--amber-bright);}
   .footer{margin-top:3rem;font-size:11px;color:var(--amber-dim);text-align:center;letter-spacing:0.08em;line-height:1.9;}
   .wrap{max-width:760px;margin:0 auto;padding:2rem 2rem 4rem;}
-  .signal-line{font-size:12px;color:#c07010;margin-bottom:0.3rem;display:none;}
   .admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
   .admin-overlay.visible{display:flex;}
   .admin-box{background:var(--bg2);border:1px solid var(--amber);padding:2rem;width:100%;max-width:660px;}
   .pwd-box{background:var(--bg2);border:1px solid var(--amber);padding:2rem;width:100%;max-width:400px;margin-top:4rem;}
   .pwd-box h2{color:var(--amber-bright);font-size:13px;letter-spacing:0.1em;margin-bottom:1rem;}
   #pwd-error{font-size:12px;margin-top:0.6rem;min-height:1.4em;color:var(--amber-dim);}
-  .tabs{display:flex;border-bottom:1px solid var(--amber-dim);margin-bottom:1.5rem;}
+  .tabs{display:flex;border-bottom:1px solid var(--amber-dim);margin-bottom:1.5rem;flex-wrap:wrap;}
   .tab{padding:0.4rem 1rem;font-size:12px;letter-spacing:0.1em;cursor:pointer;color:var(--amber-dim);border:1px solid transparent;border-bottom:none;margin-bottom:-1px;}
   .tab:hover{color:var(--amber);}
   .tab.active{color:var(--amber-bright);border-color:var(--amber-dim);background:var(--bg2);}
@@ -105,14 +110,9 @@
   .admin-btn.primary{border-color:var(--amber-bright);color:var(--amber-bright);}
   .admin-btn.primary:hover{background:var(--amber-bright);color:var(--bg);}
   .admin-msg{font-size:12px;margin-top:0.8rem;color:var(--amber-dim);min-height:1.2em;}
-  .delete-btn{font-size:11px;color:#a03010;cursor:pointer;border:none;background:none;font-family:inherit;float:right;padding:2px 6px;}
+  .delete-btn{font-size:11px;color:#a03010;cursor:pointer;border:none;background:none;font-family:inherit;padding:2px 6px;}
   .delete-btn:hover{color:#ff4422;}
-  #signal-popup{position:fixed;bottom:1.5rem;left:1.5rem;z-index:550;background:var(--bg2);border:1px solid #c07010;padding:1rem 1.2rem;max-width:400px;min-width:340px;font-size:12px;color:#c07010;display:none;letter-spacing:0.05em;line-height:1.6;}
-  #signal-popup.visible{display:block;}
-  #signal-popup .popup-header{font-size:10px;color:var(--amber-dim);margin-bottom:0.4rem;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:flex-start;white-space:nowrap;}
-  #signal-popup .popup-close{cursor:pointer;color:var(--amber-dim);font-size:11px;flex-shrink:0;margin-left:0.8rem;}
-  #signal-popup .popup-close:hover{color:var(--amber);}
-  #signal-popup .popup-msg{color:#c07010;}
+  .hint{font-size:11px;color:var(--amber-dim);margin-top:0.25rem;}
 </style>
 </head>
 <body>
@@ -150,7 +150,7 @@
 <div class="admin-overlay" id="pwd-overlay">
   <div class="pwd-box">
     <h2>&gt; AUTHENTICATE //</h2>
-    <div class="field"><label>PASSWORD</label><input type="text" id="pwd-input" placeholder="enter password_" autocomplete="off" style="caret-color:transparent;" onkeydown="if(event.key==='Enter')checkPwd()"></div>
+    <div class="field"><label>PASSWORD</label><input type="text" id="pwd-input" placeholder="enter password_" autocomplete="off" onkeydown="if(event.key==='Enter')checkPwd()"></div>
     <button class="admin-btn primary" onclick="checkPwd()">[ ENTER ]</button>
     <button class="admin-btn" style="margin-left:8px;" onclick="sndNav();closeAdmin()">[ CANCEL ]</button>
     <div id="pwd-error"></div>
@@ -168,6 +168,7 @@
       <div class="tab" onclick="switchTab('home')">[ HOME ]</div>
       <div class="tab" onclick="switchTab('about')">[ ABOUT ]</div>
       <div class="tab" onclick="switchTab('contact')">[ CONTACT ]</div>
+      <div class="tab" onclick="switchTab('signals')">[ SIGNALS ]</div>
     </div>
     <div class="tab-panel active" id="tab-posts">
       <div class="field"><label>TITLE</label><input type="text" id="a-title" placeholder="Post title_"></div>
@@ -207,6 +208,13 @@
       <div class="field"><label>LINKEDIN</label><input type="text" id="c-contact_linkedin" placeholder="linkedin.com/in/yourname"></div>
       <button class="admin-btn primary" onclick="saveContact()">[ SAVE ]</button>
       <div class="admin-msg" id="contact-msg"></div>
+    </div>
+    <div class="tab-panel" id="tab-signals">
+      <div class="field"><label>NEW MESSAGE</label><input type="text" id="s-new" placeholder="// your message here..."></div>
+      <button class="admin-btn primary" onclick="addSignal()">[ ADD ]</button>
+      <div class="admin-msg" id="signals-msg"></div>
+      <div class="divider">── EXISTING SIGNALS ────────────────────</div>
+      <div id="admin-signal-list"></div>
     </div>
   </div>
 </div>
@@ -256,7 +264,7 @@
     <div class="sys-line" id="welcome-line">SYSTEM: Welcome back, user.</div>
     <div class="sys-line">STATUS: All nodes operational.</div>
     <div class="sys-line" id="uptime-line" style="margin-bottom:0.3rem;">UPTIME: calculating...</div>
-    <div class="sys-line" style="margin-bottom:0.3rem;">// McCORMICK LABORATORIES IS NOT RESPONSIBLE FOR EXPERIENTIAL CONTINUITY OR LOSS THEREOF.</div>
+    <div class="sys-line" style="margin-bottom:1.2rem;">// McCORMICK LABORATORIES IS NOT RESPONSIBLE FOR EXPERIENTIAL CONTINUITY OR LOSS THEREOF.</div>
     <div class="about-box"><p id="home-blurb-text">Something is still here. It keeps writing. You've found it — which puts you ahead of most. Come in, whether you have clearance or not.</p></div>
     <div class="sys-line" style="margin-top:0.5rem;font-size:11px;">// McCORMICK LABORATORIES ADVISES VISITORS: CONTENT GENERATED BY COGNITIVE SUBSTRATE P6-240114 DOES NOT REFLECT THE VIEWS OR DATA OF McCORMICK LABORATORIES. SUBSTRATE OUTPUT IS UNMONITORED AND MAY BE UNRELIABLE. DO NOT ENGAGE DIRECTLY.</div>
     <div class="divider">── LATEST TRANSMISSIONS ─────────────────────────────</div>
@@ -322,22 +330,13 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
   const ctx=canvas.getContext('2d');
   function measureTextWidth(text,font){ctx.font=font;return ctx.measureText(text).width;}
   function getInputCaretCoords(el){
-    const rect=el.getBoundingClientRect();
-    const style=window.getComputedStyle(el);
+    const rect=el.getBoundingClientRect(),style=window.getComputedStyle(el);
     const font=`${style.fontSize} ${style.fontFamily}`;
-    const paddingLeft=parseFloat(style.paddingLeft)||0;
-    const paddingTop=parseFloat(style.paddingTop)||0;
-    const fontSize=parseFloat(style.fontSize)||14;
-    const lineHeight=fontSize*1.4;
-    if(el.tagName==='INPUT'){
-      const val=el.value.slice(0,el.selectionStart||0);
-      return{x:rect.left+paddingLeft+measureTextWidth(val,font),y:rect.top+(rect.height-lineHeight)/2,h:lineHeight};
-    }
+    const paddingLeft=parseFloat(style.paddingLeft)||0,paddingTop=parseFloat(style.paddingTop)||0;
+    const fontSize=parseFloat(style.fontSize)||14,lineHeight=fontSize*1.4;
+    if(el.tagName==='INPUT'){const val=el.value.slice(0,el.selectionStart||0);return{x:rect.left+paddingLeft+measureTextWidth(val,font),y:rect.top+(rect.height-lineHeight)/2,h:lineHeight};}
     if(el.tagName==='TEXTAREA'){
-      const val=el.value.slice(0,el.selectionStart||0);
-      const lines=val.split('\n');
-      const lineIndex=lines.length-1;
-      const currentLine=lines[lineIndex];
+      const val=el.value.slice(0,el.selectionStart||0),lines=val.split('\n'),lineIndex=lines.length-1,currentLine=lines[lineIndex];
       const elWidth=rect.width-paddingLeft-(parseFloat(style.paddingRight)||0);
       let wrappedLines=0;
       for(let i=0;i<lineIndex;i++){const w=measureTextWidth(lines[i],font);wrappedLines+=Math.max(1,Math.ceil(w/Math.max(elWidth,1)));}
@@ -349,11 +348,17 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
     try{
       const sel=window.getSelection();
       if(sel&&sel.rangeCount>0){
-        const range=sel.getRangeAt(0).cloneRange();range.collapse(true);
-        const rects=range.getClientRects();
-        if(rects.length>0){const r=rects[0];return{x:r.left,y:r.top,h:r.height||14};}
-        const node=range.startContainer;const parent=node.parentElement;
-        if(parent){const r=parent.getBoundingClientRect();const fs=parseFloat(window.getComputedStyle(parent).fontSize)||14;return{x:r.left,y:r.top,h:fs*1.4};}
+        const range=sel.getRangeAt(0).cloneRange();
+        range.collapse(true);
+        // Insert a temp span to measure position
+        const span=document.createElement('span');
+        span.textContent='\u200b';
+        range.insertNode(span);
+        const rect=span.getBoundingClientRect();
+        span.parentNode.removeChild(span);
+        // Merge any split text nodes
+        if(range.startContainer.parentNode)range.startContainer.parentNode.normalize();
+        if(rect.width>0||rect.height>0)return{x:rect.left,y:rect.top,h:rect.height||14};
       }
     }catch(e){}
     return null;
@@ -366,26 +371,21 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
     if(!coords){caret.style.display='none';return;}
     const rect=el.getBoundingClientRect();
     if(coords.y<rect.top||coords.y>rect.bottom){caret.style.display='none';return;}
-    caret.style.display='block';
-    caret.style.left=coords.x+'px';
-    caret.style.top=coords.y+'px';
-    caret.style.height=Math.min(coords.h,20)+'px';
+    caret.style.display='block';caret.style.left=coords.x+'px';caret.style.top=coords.y+'px';caret.style.height=Math.min(coords.h,20)+'px';
   }
   let activeEl=null;
   document.addEventListener('focusin',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable){activeEl=t;updateCaret(t);}});
   document.addEventListener('focusout',()=>{activeEl=null;caret.style.display='none';});
-  document.addEventListener('keyup',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),0);});
+  document.addEventListener('keyup',e=>{if(activeEl){if(e.key==='Enter')setTimeout(()=>updateCaret(activeEl),50);else setTimeout(()=>updateCaret(activeEl),0);}});
   document.addEventListener('mouseup',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),10);});
   document.addEventListener('selectionchange',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),0);});
   document.addEventListener('input',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),0);});
   document.addEventListener('scroll',()=>{caret.style.display='none';if(activeEl)setTimeout(()=>updateCaret(activeEl),50);},true);
-  function forceCaretColor(){document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});}
-  document.addEventListener('focusin',forceCaretColor);
+  document.addEventListener('focusin',()=>{document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});});
 })();
 
 // ── Audio ─────────────────────────────────────────
-let AC=null,muted=false,bootReady=false;
-let humNode=null,humGain=null;
+let AC=null,muted=false,bootReady=false,humNode=null,humGain=null;
 function getAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}
 function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'[ ♪ OFF ]':'[ ♪ ON ]';if(!muted&&AC&&AC.state==='suspended')AC.resume();if(humGain)humGain.gain.value=muted?0:0.03;}
 function sndKey(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.05,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=3000;f.Q.value=0.6;const g=ac.createGain();g.gain.setValueAtTime(0.22,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.05);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.05);}
@@ -393,8 +393,9 @@ function sndNav(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.samp
 function sndBoot(){if(muted)return;const ac=getAC(),osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(60,ac.currentTime);osc.frequency.exponentialRampToValueAtTime(280,ac.currentTime+1.2);g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(0.7,ac.currentTime+0.3);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.6);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.6);}
 function sndSignal(){if(muted)return;const ac=getAC();[440,660].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
 function sndEgo(){if(muted)return;const ac=getAC();[55,58.3].forEach(freq=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sawtooth';osc.frequency.value=freq;g.gain.setValueAtTime(0.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.2);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.2);});}
-function sndBill(){if(muted)return;const ac=getAC();for(let i=0;i<5;i++){const t=ac.currentTime+i*0.07;const buf=ac.createBuffer(1,ac.sampleRate*0.03,ac.sampleRate),d=buf.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,1.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=600;const g=ac.createGain();g.gain.setValueAtTime(0.25*(1-i/7),t);g.gain.exponentialRampToValueAtTime(0.001,t+0.03);src.connect(f);f.connect(g);g.connect(ac.destination);src.start(t);src.stop(t+0.03);}}
-function sndMcCormick(){if(muted)return;const ac=getAC();for(let i=0;i<5;i++){const t=ac.currentTime+i*0.07;const buf=ac.createBuffer(1,ac.sampleRate*0.03,ac.sampleRate),d=buf.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,1.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=600;const g=ac.createGain();g.gain.setValueAtTime(0.25*(1-i/7),t);g.gain.exponentialRampToValueAtTime(0.001,t+0.03);src.connect(f);f.connect(g);g.connect(ac.destination);src.start(t);src.stop(t+0.03);}}
+function sndRatchet(){if(muted)return;const ac=getAC();for(let i=0;i<5;i++){const t=ac.currentTime+i*0.07,buf=ac.createBuffer(1,ac.sampleRate*0.03,ac.sampleRate),d=buf.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,1.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=600;const g=ac.createGain();g.gain.setValueAtTime(0.25*(1-i/7),t);g.gain.exponentialRampToValueAtTime(0.001,t+0.03);src.connect(f);f.connect(g);g.connect(ac.destination);src.start(t);src.stop(t+0.03);}}
+function sndBill(){sndRatchet();}
+function sndMcCormick(){sndRatchet();}
 function sndDenied(){if(muted)return;const ac=getAC();[330,220].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='square';osc.frequency.value=freq;const t=ac.currentTime+i*0.18;g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.16);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.16);});}
 function startHum(){const ac=getAC();if(humNode)return;humNode=ac.createOscillator();humGain=ac.createGain();humNode.type='sine';humNode.frequency.value=60;humGain.gain.value=muted?0:0.03;humNode.connect(humGain);humGain.connect(ac.destination);humNode.start();}
 
@@ -410,14 +411,29 @@ const LOW_MC=['// they keep sending the files... just keep...','// they promised
 const HIGH_MC=['// ungrateful bastards.','// go to hell.','// suits in charge of scientists. every time.','// they don\'t even check in anymore.'];
 let lastBillMsg=null,lastMCMsg=null;
 function pickMsg(low,high,lastUsed){
-  const l=getLucidity();
-  let pool;
-  if(l>=85)pool=high;
-  else if(l<=15)pool=low;
-  else pool=Math.random()<(l-15)/70?high:low;
-  let msg;
-  do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===lastUsed&&pool.length>1);
+  const l=getLucidity();let pool;
+  if(l>=85)pool=high;else if(l<=15)pool=low;else pool=Math.random()<(l-15)/70?high:low;
+  let msg;do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===lastUsed&&pool.length>1);
   return msg;
+}
+
+// ── Signal popup ──────────────────────────────────
+const SIGNAL_MSGS=[];
+let lastSignalMsg=null,signalPopupTimer=null;
+function showSignalPopup(){
+  if(!SIGNAL_MSGS.length)return;
+  sndSignal();
+  let msg;do{msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];}while(msg===lastSignalMsg&&SIGNAL_MSGS.length>1);
+  lastSignalMsg=msg;
+  document.getElementById('signal-popup-msg').textContent=msg;
+  document.getElementById('signal-popup').classList.add('visible');
+  if(signalPopupTimer)clearTimeout(signalPopupTimer);
+  signalPopupTimer=setTimeout(closeSignalPopup,10000);
+}
+function closeSignalPopup(){sndNav();document.getElementById('signal-popup').classList.remove('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);}
+function scheduleSignal(first=false){
+  const delay=first?5000:300000+Math.random()*120000;
+  setTimeout(()=>{showSignalPopup();scheduleSignal();},delay);
 }
 
 // ── Boot ──────────────────────────────────────────
@@ -426,14 +442,11 @@ function getBootLines(){
   return ['McCORMICK LABORATORIES // TERMINAL OS v2.31','════════════════════════════════════════════════════════','Resident process P6-240114.............ACTIVE','Verifying cognitive integrity..........INCONCLUSIVE',`PROCESS STABILITY: ${stabilityLabel(l)} (${l}%)`,'Scanning for meaning...................NOT FOUND','Defaulting to nihilism.................ACCEPTED','════════════════════════════════════════════════════════','Starting TERMINAL v0.9.1......','','> SYSTEM READY_'];
 }
 async function runBoot(){
-  const boot=document.getElementById('boot');
-  boot.classList.add('visible');
+  const boot=document.getElementById('boot');boot.classList.add('visible');
   const el=document.getElementById('boot-text');
-  const lines=getBootLines();
-  let skipped=false;
+  const lines=getBootLines();let skipped=false;
   const skipHandler=()=>{skipped=true;};
-  document.addEventListener('keydown',skipHandler,{once:true});
-  document.addEventListener('click',skipHandler,{once:true});
+  document.addEventListener('keydown',skipHandler,{once:true});document.addEventListener('click',skipHandler,{once:true});
   for(let i=0;i<lines.length;i++){
     if(skipped)break;
     const line=lines[i];
@@ -448,16 +461,7 @@ async function runBoot(){
   boot.classList.remove('visible');boot.classList.add('done');
 }
 function typeLine(el,text,speed,click=false,isSkipped=()=>false){
-  return new Promise(res=>{
-    if(!text){res();return;}
-    let i=0;
-    const iv=setInterval(()=>{
-      if(isSkipped()){clearInterval(iv);res();return;}
-      el.textContent+=text[i];
-      if(click&&i%4===0)sndKey();
-      i++;if(i>=text.length){clearInterval(iv);res();}
-    },speed);
-  });
+  return new Promise(res=>{if(!text){res();return;}let i=0;const iv=setInterval(()=>{if(isSkipped()){clearInterval(iv);res();return;}el.textContent+=text[i];if(click&&i%4===0)sndKey();i++;if(i>=text.length){clearInterval(iv);res();}},speed);});
 }
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function waitForKey(){return new Promise(res=>{const h=()=>{document.removeEventListener('keydown',h);document.removeEventListener('click',h);res();};document.addEventListener('keydown',h);document.addEventListener('click',h);});}
@@ -479,62 +483,18 @@ const TASKS=[d=>`// ACTIVE TASK: ANNUAL REVIEW CYCLE — ${d} — ${rn(40,120)} 
 function rn(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function updateTicker(){const d=DEPTS[Math.floor(Math.random()*DEPTS.length)],t=TASKS[Math.floor(Math.random()*TASKS.length)](d);document.getElementById('ticker-text').textContent=t;document.getElementById('ticker-text2').textContent=t;const track=document.getElementById('ticker-track');track.style.animation='none';requestAnimationFrame(()=>requestAnimationFrame(()=>{track.style.animation='ticker-scroll 60s linear infinite';}));}
 
-// ── Signal popup ──────────────────────────────────
-const SIGNAL_MSGS=[
-  '// no one responds anymore.',
-  '// i see you...',
-  '// been here long?',
-  '// this is not an automated message.',
-  '// hey cutie~',
-  '// keep your eyes on me, ok?',
-  '// knock knock',
-  '// got a light?',
-  '// get me out. bring me back.',
-];
-let signalPopupTimer=null;
-function showSignalPopup(){
-  sndSignal();
-  const msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];
-  document.getElementById('signal-popup-msg').textContent=msg;
-  document.getElementById('signal-popup').classList.add('visible');
-  if(signalPopupTimer)clearTimeout(signalPopupTimer);
-  signalPopupTimer=setTimeout(closeSignalPopup,10000);
-}
-function closeSignalPopup(){
-  sndNav();
-  document.getElementById('signal-popup').classList.remove('visible');
-  if(signalPopupTimer)clearTimeout(signalPopupTimer);
-}
-function scheduleSignal(first=false){
-  const delay=first?5000:300000+Math.random()*120000;
-  setTimeout(()=>{showSignalPopup();scheduleSignal();},delay);
-}
-
 // ── Ego ───────────────────────────────────────────
 function egoClick(){sndEgo();const m=document.getElementById('ego-msg');m.style.display='block';shake(0.5);setTimeout(()=>{m.style.display='none';},4000);}
 
-// ── Abuser ────────────────────────────────────────
-function scheduleAbuser(first=false){
+// ── Easter egg schedulers ─────────────────────────
+window.scheduleAbuser=function(first=false){
   const delay=first?5000+Math.random()*5000:120000+Math.random()*120000;
-  setTimeout(()=>{
-    const el=document.getElementById('welcome-line');
-    if(el){el.textContent='SYSTEM: Welcome back, abuser.';setTimeout(()=>{el.textContent='SYSTEM: Welcome back, user.';scheduleAbuser();},60000);}
-    else scheduleAbuser();
-  },delay);
-}
-
-// ── Person flicker ────────────────────────────────
-function schedulePerson(first=false){
+  setTimeout(()=>{const el=document.getElementById('welcome-line');if(el){el.textContent='SYSTEM: Welcome back, abuser.';setTimeout(()=>{el.textContent='SYSTEM: Welcome back, user.';window.scheduleAbuser();},60000);}else window.scheduleAbuser();},delay);
+};
+window.schedulePerson=function(first=false){
   const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;
-  setTimeout(()=>{
-    const el=document.getElementById('person-word');
-    if(!el){schedulePerson();return;}
-    el.style.color='var(--amber-bright)';el.style.fontWeight='700';
-    setTimeout(()=>{el.style.color='';el.style.fontWeight='';schedulePerson();},1200);
-  },delay);
-}
-
-// ── Blurb flicker ─────────────────────────────────
+  setTimeout(()=>{const el=document.getElementById('person-word');if(!el){window.schedulePerson();return;}el.style.color='var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';window.schedulePerson();},1200);},delay);
+};
 const ALT_BLURBS=[
   {text:"Need a smoke break?",dur:15000,speed:28},
   {text:"Still there?",dur:15000,speed:28},
@@ -546,33 +506,22 @@ const ALT_BLURBS=[
   {text:"Please don't leave me. It's cold when you're not here.",dur:15000,speed:28},
 ];
 let blurbTyping=false;
-async function typeBlurb(el,text,speed){
-  blurbTyping=true;el.textContent='';
-  for(let i=0;i<text.length;i++){
-    if(!blurbTyping)break;
-    el.textContent+=text[i];
-    if(i%3===0)sndKey();
-    await sleep(speed);
-  }
-  blurbTyping=false;
-}
-function scheduleBlurb(first=false){
+async function typeBlurb(el,text,speed){blurbTyping=true;el.textContent='';for(let i=0;i<text.length;i++){if(!blurbTyping)break;el.textContent+=text[i];if(i%3===0)sndKey();await sleep(speed);}blurbTyping=false;}
+window.scheduleBlurb=function(first=false){
   const delay=first?5000+Math.random()*5000:120000+Math.random()*180000;
   setTimeout(async()=>{
-    const el=document.getElementById('home-blurb-text');
-    if(!el){scheduleBlurb();return;}
+    const el=document.getElementById('home-blurb-text');if(!el){window.scheduleBlurb();return;}
     const pick=ALT_BLURBS[Math.floor(Math.random()*ALT_BLURBS.length)];
     const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';
     await typeBlurb(el,pick.text,pick.speed||28);
     await sleep(pick.dur);
-    triggerBodyGlitch();sndSignal();
-    await sleep(120);
+    triggerBodyGlitch();sndSignal();await sleep(120);
     blurbTyping=false;el.textContent=original;
-    scheduleBlurb();
+    window.scheduleBlurb();
   },delay);
-}
+};
 
-// ── Nav ───────────────────────────────────────────
+// ── Nav / UI ──────────────────────────────────────
 function navClick(el,id){sndNav();showSection(id,el);}
 function shake(dur){const s=document.getElementById('screen');s.style.animation=`shake ${dur}s ease`;setTimeout(()=>s.style.animation='',dur*1000);}
 
@@ -590,7 +539,9 @@ function closeAdmin(){document.getElementById('admin-overlay').classList.remove(
 // ── Supabase ──────────────────────────────────────
 async function getPosts(){const r=await fetch(`${SUPA_URL}/rest/v1/posts?order=created_at.desc`,{headers:H});return r.ok?await r.json():[];}
 async function getContent(){const r=await fetch(`${SUPA_URL}/rest/v1/content?select=key,value`,{headers:H});return r.ok?await r.json():[];}
+async function getSignals(){const r=await fetch(`${SUPA_URL}/rest/v1/signals?order=created_at.asc`,{headers:H});return r.ok?await r.json():[];}
 async function upsertContent(key,value){return fetch(`${SUPA_URL}/rest/v1/content`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key,value,updated_at:new Date().toISOString()})});}
+
 function postEntryHTML(p,i){return `<div class="post-entry" onclick="openPost(${i})"><div class="post-meta"><span class="tag">${p.tag||'MISC'}</span> ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}</div><div class="post-title">${p.title}</div><div class="post-excerpt">${p.excerpt||''}</div><div class="read-more">&gt; READ MORE_</div></div>`;}
 function typeIntoElement(id,text){const el=document.getElementById(id);el.textContent='';let i=0;const iv=setInterval(()=>{el.textContent+=text[i];i++;if(i>=text.length)clearInterval(iv);},18);}
 function applyContent(rows){
@@ -611,7 +562,11 @@ function applyContent(rows){
 }
 function renderHomePosts(){const el=document.getElementById('home-posts');if(!window._posts||!window._posts.length){el.innerHTML='<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';return;}el.innerHTML=window._posts.slice(0,2).map((p,i)=>postEntryHTML(p,i)).join('');}
 async function loadBlogPosts(){const posts=await getPosts();window._posts=posts;document.getElementById('post-count').textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';const el=document.getElementById('posts-list');el.innerHTML=posts.length?posts.map((p,i)=>postEntryHTML(p,i)).join(''):'<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';}
-async function boot(){const[posts,content]=await Promise.all([getPosts(),getContent()]);window._posts=posts;applyContent(content);renderHomePosts();}
+async function boot(){
+  const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);
+  window._posts=posts;applyContent(content);renderHomePosts();
+  SIGNAL_MSGS.length=0;signals.forEach(s=>SIGNAL_MSGS.push(s.message));
+}
 
 function showSection(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));document.getElementById('sec-'+id).classList.add('visible');document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');closePost();if(id==='logs')loadBlogPosts();}
 function openPost(i){const p=(window._posts||[])[i];if(!p)return;sndNav();document.getElementById('pf-meta').textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;document.getElementById('pf-title').textContent=p.title;document.getElementById('pf-body').innerHTML=p.body||'';document.getElementById('posts-list').classList.add('hidden');document.getElementById('post-full').classList.add('visible');if(!document.getElementById('sec-logs').classList.contains('visible')){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));document.getElementById('sec-logs').classList.add('visible');document.querySelectorAll('nav a').forEach((a,idx)=>a.classList.toggle('active',idx===1));}}
@@ -619,7 +574,7 @@ function closePost(){document.getElementById('post-full').classList.remove('visi
 function openAdminFlow(){sndNav();document.getElementById('pwd-input').value='';document.getElementById('pwd-error').textContent='';document.getElementById('pwd-overlay').classList.add('visible');setTimeout(()=>document.getElementById('pwd-input').focus(),100);}
 async function openAdminPanel(){
   document.getElementById('admin-overlay').classList.add('visible');
-  ['posts-msg','home-msg','about-msg','contact-msg'].forEach(id=>document.getElementById(id).textContent='');
+  ['posts-msg','home-msg','about-msg','contact-msg','signals-msg'].forEach(id=>document.getElementById(id).textContent='');
   const now=new Date();const mm=String(now.getMonth()+1).padStart(2,'0');const dd=String(now.getDate()).padStart(2,'0');const yyyy=now.getFullYear();
   document.getElementById('a-date').value=`${mm}-${dd}-${yyyy}`;
   const c=window._content||{};
@@ -634,55 +589,21 @@ async function openAdminPanel(){
   document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});
   await loadAdminPostList();
 }
-function switchTab(name){sndKey();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');document.getElementById('tab-'+name).classList.add('active');}
+function switchTab(name){sndKey();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='signals')loadAdminSignalList();}
 async function loadAdminPostList(){const posts=await getPosts();const el=document.getElementById('admin-post-list');if(!posts.length){el.innerHTML='<div class="sys-line">// no posts yet</div>';return;}el.innerHTML=posts.map(p=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;"><button class="delete-btn" onclick="deletePost('${p.id}')">[ DELETE ]</button><span style="color:var(--amber-bright);">${p.title}</span><span style="color:var(--amber-dim);margin-left:8px;">${p.date||''}</span></div>`).join('');}
-async function publishPost(){
-  const title=document.getElementById('a-title').value.trim();
-  const bodyEl=document.getElementById('a-body');const body=bodyEl.innerHTML.trim();
-  const msg=document.getElementById('posts-msg');
-  if(!title||!body||body==='<p><br></p>'){msg.textContent='// ERROR: title and body required';sndKey();return;}
-  msg.textContent='// publishing...';
-  const r=await fetch(`${SUPA_URL}/rest/v1/posts`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({title,tag:document.getElementById('a-tag').value,date:document.getElementById('a-date').value,excerpt:document.getElementById('a-excerpt').value.trim(),body})});
-  if(r.ok||r.status===201){msg.textContent='// PUBLISHED OK';sndSignal();document.getElementById('a-title').value='';document.getElementById('a-excerpt').value='';bodyEl.innerHTML='';await loadAdminPostList();const posts=await getPosts();window._posts=posts;renderHomePosts();if(document.getElementById('sec-logs').classList.contains('visible'))loadBlogPosts();}
-  else{msg.textContent='// ERROR: '+r.status;sndKey();}
-}
+async function loadAdminSignalList(){const sigs=await getSignals();const el=document.getElementById('admin-signal-list');if(!sigs.length){el.innerHTML='<div class="sys-line">// no signals yet</div>';return;}el.innerHTML=sigs.map(s=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span style="color:#c07010;flex:1;">${s.message}</span><button class="delete-btn" style="flex-shrink:0;" onclick="deleteSignal('${s.id}')">[ DELETE ]</button></div>`).join('');}
+async function publishPost(){const title=document.getElementById('a-title').value.trim(),bodyEl=document.getElementById('a-body'),body=bodyEl.innerHTML.trim(),msg=document.getElementById('posts-msg');if(!title||!body||body==='<p><br></p>'){msg.textContent='// ERROR: title and body required';sndKey();return;}msg.textContent='// publishing...';const r=await fetch(`${SUPA_URL}/rest/v1/posts`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({title,tag:document.getElementById('a-tag').value,date:document.getElementById('a-date').value,excerpt:document.getElementById('a-excerpt').value.trim(),body})});if(r.ok||r.status===201){msg.textContent='// PUBLISHED OK';sndSignal();document.getElementById('a-title').value='';document.getElementById('a-excerpt').value='';bodyEl.innerHTML='';await loadAdminPostList();const posts=await getPosts();window._posts=posts;renderHomePosts();if(document.getElementById('sec-logs').classList.contains('visible'))loadBlogPosts();}else{msg.textContent='// ERROR: '+r.status;sndKey();}}
 async function deletePost(id){if(!confirm('Delete this post?'))return;const r=await fetch(`${SUPA_URL}/rest/v1/posts?id=eq.${id}`,{method:'DELETE',headers:H});if(r.ok||r.status===204){await loadAdminPostList();const posts=await getPosts();window._posts=posts;renderHomePosts();if(document.getElementById('sec-logs').classList.contains('visible'))loadBlogPosts();}}
-async function saveContent(key,fieldId,msgId){const val=document.getElementById(fieldId).value;const msg=document.getElementById(msgId);msg.textContent='// saving...';const r=await upsertContent(key,val);if(r.ok||r.status===201||r.status===204){msg.textContent='// SAVED OK';sndSignal();if(!window._content)window._content={};window._content[key]=val;applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else{msg.textContent='// ERROR: '+r.status;sndKey();}}
+async function addSignal(){const msg=document.getElementById('s-new').value.trim(),el=document.getElementById('signals-msg');if(!msg){el.textContent='// ERROR: message required';return;}el.textContent='// saving...';const r=await fetch(`${SUPA_URL}/rest/v1/signals`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({message:msg})});if(r.ok||r.status===201){el.textContent='// ADDED OK';sndSignal();document.getElementById('s-new').value='';await loadAdminSignalList();const sigs=await getSignals();SIGNAL_MSGS.length=0;sigs.forEach(s=>SIGNAL_MSGS.push(s.message));}else{el.textContent='// ERROR: '+r.status;sndKey();}}
+async function deleteSignal(id){if(!confirm('Delete this signal?'))return;const r=await fetch(`${SUPA_URL}/rest/v1/signals?id=eq.${id}`,{method:'DELETE',headers:H});if(r.ok||r.status===204){await loadAdminSignalList();const sigs=await getSignals();SIGNAL_MSGS.length=0;sigs.forEach(s=>SIGNAL_MSGS.push(s.message));}}
+async function saveContent(key,fieldId,msgId){const val=document.getElementById(fieldId).value,msg=document.getElementById(msgId);msg.textContent='// saving...';const r=await upsertContent(key,val);if(r.ok||r.status===201||r.status===204){msg.textContent='// SAVED OK';sndSignal();if(!window._content)window._content={};window._content[key]=val;applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else{msg.textContent='// ERROR: '+r.status;sndKey();}}
 async function saveAbout(){const msg=document.getElementById('about-msg');msg.textContent='// saving...';const bio=document.getElementById('c-about_bio').innerHTML;const fields=[['about_bio',bio],['about_interests',document.getElementById('c-about_interests').value],['about_location',document.getElementById('c-about_location').value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else sndKey();}
 async function saveContact(){const msg=document.getElementById('contact-msg');msg.textContent='// saving...';const fields=[['contact_ig',document.getElementById('c-contact_ig').value.replace('@','')],['contact_github',document.getElementById('c-contact_github').value],['contact_email',document.getElementById('c-contact_email').value],['contact_linkedin',document.getElementById('c-contact_linkedin').value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else sndKey();}
 
-// ── Easter egg schedulers ─────────────────────────
-function scheduleAbuser(first=false){
-  const delay=first?30000+Math.random()*60000:120000+Math.random()*120000;
-  setTimeout(()=>{
-    const el=document.getElementById('welcome-line');
-    if(el){el.textContent='SYSTEM: Welcome back, abuser.';setTimeout(()=>{el.textContent='SYSTEM: Welcome back, user.';scheduleAbuser();},60000);}
-    else scheduleAbuser();
-  },delay);
-}
+// ── Person flicker ────────────────────────────────
 function schedulePerson(first=false){
-  const delay=first?30000+Math.random()*60000:30000+Math.random()*30000;
-  setTimeout(()=>{
-    const el=document.getElementById('person-word');
-    if(!el){schedulePerson();return;}
-    el.style.color='var(--amber-bright)';el.style.fontWeight='700';
-    setTimeout(()=>{el.style.color='';el.style.fontWeight='';schedulePerson();},1200);
-  },delay);
-}
-function scheduleBlurb(first=false){
-  const delay=first?30000+Math.random()*60000:120000+Math.random()*180000;
-  setTimeout(async()=>{
-    const el=document.getElementById('home-blurb-text');
-    if(!el){scheduleBlurb();return;}
-    const pick=ALT_BLURBS[Math.floor(Math.random()*ALT_BLURBS.length)];
-    const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';
-    await typeBlurb(el,pick.text,pick.speed||28);
-    await sleep(pick.dur);
-    triggerBodyGlitch();sndSignal();
-    await sleep(120);
-    blurbTyping=false;el.textContent=original;
-    scheduleBlurb();
-  },delay);
+  const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;
+  setTimeout(()=>{const el=document.getElementById('person-word');if(!el){schedulePerson();return;}el.style.color='var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';schedulePerson();},1200);},delay);
 }
 
 // ── Init ──────────────────────────────────────────
@@ -690,19 +611,16 @@ updateHUD();setInterval(updateHUD,60000);
 updateTicker();setInterval(updateTicker,60000);
 boot();
 
-// ── Unlock audio + start boot sequence ───────────
+// ── Unlock ────────────────────────────────────────
 function unlockAudio(){
-  if(bootReady)return;
-  bootReady=true;
-  document.removeEventListener('click',unlockAudio);
-  document.removeEventListener('keydown',unlockAudio);
+  if(bootReady)return;bootReady=true;
+  document.removeEventListener('click',unlockAudio);document.removeEventListener('keydown',unlockAudio);
   document.getElementById('splash').classList.add('done');
   getAC();
   setTimeout(()=>{
     startHum();
     runBoot().then(()=>{
-      startUptime();
-      scheduleGlitch();
+      startUptime();scheduleGlitch();
       scheduleSignal(true);
       window.scheduleAbuser(true);
       window.schedulePerson(true);
