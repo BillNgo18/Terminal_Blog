@@ -491,6 +491,7 @@ function showSignalPopup(){
   signalPopupTimer=setTimeout(closeSignalPopup,10000);
 }
 function closeSignalPopup(){
+  sndNav();
   document.getElementById('signal-popup').classList.remove('visible');
   if(signalPopupTimer)clearTimeout(signalPopupTimer);
 }
@@ -569,7 +570,7 @@ function shake(dur){const s=document.getElementById('screen');s.style.animation=
 function checkPwd(){
   const val=document.getElementById('pwd-input').value.trim().toLowerCase();
   const errEl=document.getElementById('pwd-error');
-  if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;}
+  if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){sndNav();document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;}
   if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';errEl.textContent=pickMsg(LOW_BILL,HIGH_BILL);sndBill();shake(0.4);document.getElementById('pwd-input').value='';return;}
   if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){errEl.style.color=getLucidity()>=50?'#ffaa33':'#a06810';errEl.textContent=pickMsg(LOW_MC,HIGH_MC);sndMcCormick();shake(0.6);document.getElementById('pwd-input').value='';return;}
   errEl.style.color='#a06810';errEl.textContent='// ACCESS DENIED';sndDenied();
