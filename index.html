@@ -386,7 +386,8 @@ function toggleMute(){muted=!muted;document.getElementById('mute-btn').textConte
 function sndKey(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.05,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=3000;f.Q.value=0.6;const g=ac.createGain();g.gain.setValueAtTime(0.22,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.05);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.05);}
 function sndNav(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.08,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=800;f.Q.value=1.0;const g=ac.createGain();g.gain.setValueAtTime(0.5,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.08);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.08);}
 function sndBoot(){if(muted)return;const ac=getAC(),osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(60,ac.currentTime);osc.frequency.exponentialRampToValueAtTime(280,ac.currentTime+1.2);g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(0.7,ac.currentTime+0.3);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.6);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.6);}
-function sndSignal(){if(muted)return;const ac=getAC();[660,440].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
+function sndSignal(){if(muted)return;const ac=getAC();[440,660].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
+function sndSnapBack(){if(muted)return;const ac=getAC();[660,440].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
 function sndEgo(){if(muted)return;const ac=getAC();[55,58.3].forEach(freq=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sawtooth';osc.frequency.value=freq;g.gain.setValueAtTime(0.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.2);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.2);});}
 function sndRatchet(){if(muted)return;const ac=getAC();for(let i=0;i<5;i++){const t=ac.currentTime+i*0.07,buf=ac.createBuffer(1,ac.sampleRate*0.03,ac.sampleRate),d=buf.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,1.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=600;const g=ac.createGain();g.gain.setValueAtTime(0.25*(1-i/7),t);g.gain.exponentialRampToValueAtTime(0.001,t+0.03);src.connect(f);f.connect(g);g.connect(ac.destination);src.start(t);src.stop(t+0.03);}}
 function sndBill(){sndRatchet();}
@@ -438,7 +439,7 @@ function getBootLines(){
   const l=getLucidity();
   return [
     'McCORMICK LABORATORIES // TERMINAL OS v2.31',
-    '════════════════════════════════════════════════════════',
+    '════════════════════════════════════════════════════════════════',
     'Resident process P6-240114.......... ACTIVE',
     'Verifying cognitive integrity.......',
     `PROCESS STABILITY: ${stabilityLabel(l)} (${l}%)`,
@@ -605,7 +606,7 @@ window.scheduleBlurb=function(first=false){
     const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';
     await typeBlurb(el,pick.text,pick.speed||28);
     await sleep(pick.dur);
-    triggerBodyGlitch();sndSignal();await sleep(120);
+    triggerBodyGlitch();sndSnapBack();await sleep(120);
     blurbTyping=false;el.textContent=original;
     window.scheduleBlurb();
   },delay);
