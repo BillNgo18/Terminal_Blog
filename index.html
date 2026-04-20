@@ -348,15 +348,11 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
     try{
       const sel=window.getSelection();
       if(sel&&sel.rangeCount>0){
-        const range=sel.getRangeAt(0).cloneRange();
-        range.collapse(true);
-        // Insert a temp span to measure position
-        const span=document.createElement('span');
-        span.textContent='\u200b';
+        const range=sel.getRangeAt(0).cloneRange();range.collapse(true);
+        const span=document.createElement('span');span.textContent='\u200b';
         range.insertNode(span);
         const rect=span.getBoundingClientRect();
         span.parentNode.removeChild(span);
-        // Merge any split text nodes
         if(range.startContainer.parentNode)range.startContainer.parentNode.normalize();
         if(rect.width>0||rect.height>0)return{x:rect.left,y:rect.top,h:rect.height||14};
       }
@@ -374,14 +370,13 @@ const UPLOAD_DATE=new Date('2024-01-14T00:00:00');
     caret.style.display='block';caret.style.left=coords.x+'px';caret.style.top=coords.y+'px';caret.style.height=Math.min(coords.h,20)+'px';
   }
   let activeEl=null;
-  document.addEventListener('focusin',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable){activeEl=t;updateCaret(t);}});
+  document.addEventListener('focusin',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable){activeEl=t;updateCaret(t);}document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});});
   document.addEventListener('focusout',()=>{activeEl=null;caret.style.display='none';});
   document.addEventListener('keyup',e=>{if(activeEl){if(e.key==='Enter')setTimeout(()=>updateCaret(activeEl),50);else setTimeout(()=>updateCaret(activeEl),0);}});
   document.addEventListener('mouseup',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),10);});
   document.addEventListener('selectionchange',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),0);});
   document.addEventListener('input',()=>{if(activeEl)setTimeout(()=>updateCaret(activeEl),0);});
   document.addEventListener('scroll',()=>{caret.style.display='none';if(activeEl)setTimeout(()=>updateCaret(activeEl),50);},true);
-  document.addEventListener('focusin',()=>{document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});});
 })();
 
 // ── Audio ─────────────────────────────────────────
@@ -391,12 +386,14 @@ function toggleMute(){muted=!muted;document.getElementById('mute-btn').textConte
 function sndKey(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.05,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=3000;f.Q.value=0.6;const g=ac.createGain();g.gain.setValueAtTime(0.22,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.05);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.05);}
 function sndNav(){if(muted)return;const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*0.08,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=800;f.Q.value=1.0;const g=ac.createGain();g.gain.setValueAtTime(0.5,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+0.08);src.connect(f);f.connect(g);g.connect(ac.destination);src.start();src.stop(ac.currentTime+0.08);}
 function sndBoot(){if(muted)return;const ac=getAC(),osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(60,ac.currentTime);osc.frequency.exponentialRampToValueAtTime(280,ac.currentTime+1.2);g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(0.7,ac.currentTime+0.3);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.6);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.6);}
-function sndSignal(){if(muted)return;const ac=getAC();[440,660].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
+function sndSignal(){if(muted)return;const ac=getAC();[660,440].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sine';osc.frequency.value=freq;const t=ac.currentTime+i*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.3);});}
 function sndEgo(){if(muted)return;const ac=getAC();[55,58.3].forEach(freq=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='sawtooth';osc.frequency.value=freq;g.gain.setValueAtTime(0.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+1.2);osc.connect(g);g.connect(ac.destination);osc.start();osc.stop(ac.currentTime+1.2);});}
 function sndRatchet(){if(muted)return;const ac=getAC();for(let i=0;i<5;i++){const t=ac.currentTime+i*0.07,buf=ac.createBuffer(1,ac.sampleRate*0.03,ac.sampleRate),d=buf.getChannelData(0);for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,1.5);const src=ac.createBufferSource();src.buffer=buf;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=600;const g=ac.createGain();g.gain.setValueAtTime(0.25*(1-i/7),t);g.gain.exponentialRampToValueAtTime(0.001,t+0.03);src.connect(f);f.connect(g);g.connect(ac.destination);src.start(t);src.stop(t+0.03);}}
 function sndBill(){sndRatchet();}
 function sndMcCormick(){sndRatchet();}
-function sndDenied(){if(muted)return;const ac=getAC();[330,220].forEach((freq,i)=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='square';osc.frequency.value=freq;const t=ac.currentTime+i*0.18;g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.16);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.16);});}
+function sndDenied(){if(muted)return;const ac=getAC();[0,1].forEach(i=>{const osc=ac.createOscillator(),g=ac.createGain();osc.type='square';osc.frequency.value=220;const t=ac.currentTime+i*0.10;g.gain.setValueAtTime(0.12,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);osc.connect(g);g.connect(ac.destination);osc.start(t);osc.stop(t+0.12);});}
+function sndBarInconclusive(){sndDenied();}
+function sndBarNotFound(){sndDenied();}
 function startHum(){const ac=getAC();if(humNode)return;humNode=ac.createOscillator();humGain=ac.createGain();humNode.type='sine';humNode.frequency.value=60;humGain.gain.value=muted?0:0.03;humNode.connect(humGain);humGain.connect(ac.destination);humNode.start();}
 
 // ── Lucidity ──────────────────────────────────────
@@ -439,27 +436,120 @@ function scheduleSignal(first=false){
 // ── Boot ──────────────────────────────────────────
 function getBootLines(){
   const l=getLucidity();
-  return ['McCORMICK LABORATORIES // TERMINAL OS v2.31','════════════════════════════════════════════════════════','Resident process P6-240114.............ACTIVE','Verifying cognitive integrity..........INCONCLUSIVE',`PROCESS STABILITY: ${stabilityLabel(l)} (${l}%)`,'Scanning for meaning...................NOT FOUND','Defaulting to nihilism.................ACCEPTED','════════════════════════════════════════════════════════','Starting TERMINAL v0.9.1......','','> SYSTEM READY_'];
+  return [
+    'McCORMICK LABORATORIES // TERMINAL OS v2.31',
+    '════════════════════════════════════════════════════════',
+    'Resident process P6-240114.......... ACTIVE',
+    'Verifying cognitive integrity.......',
+    `PROCESS STABILITY: ${stabilityLabel(l)} (${l}%)`,
+    'Scanning for meaning................',
+    'Defaulting to nihilism..............',
+    '════════════════════════════════════════════════════════',
+    'Starting TERMINAL v0.9.1......',
+    '',
+    '> SYSTEM READY_'
+  ];
 }
+
+async function bootBar(el,fillPct){
+  const width=20,filled=Math.round(width*fillPct/100);
+  // Build random delays first so we can pre-schedule sounds to match
+  const delays=[];
+  for(let i=0;i<=filled;i++)delays.push(10+Math.random()*200);
+  // Pre-schedule ticks timed to match visual delays
+  if(AC&&!muted){
+    let t=AC.currentTime+0.05;
+    for(let i=0;i<delays.length;i++){
+      const osc=AC.createOscillator(),g=AC.createGain();
+      osc.type='sine';osc.frequency.value=100+Math.random()*40;
+      g.gain.setValueAtTime(0.12,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.04);
+      osc.connect(g);g.connect(AC.destination);
+      osc.start(t);osc.stop(t+0.04);
+      t+=delays[i]/1000;
+    }
+  }
+  for(let current=0;current<=filled;current++){
+    const bar=' ['+('█'.repeat(current)+'░'.repeat(width-current))+']';
+    const lines=el.textContent.split('\n');
+    lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+bar;
+    el.textContent=lines.join('\n');
+    await sleep(delays[current]);
+  }
+}
+
+async function runBootBarLine(el,line,fillPct,labelFn,sndFn){
+  await typeLine(el,line,18,true,()=>false);
+  await bootBar(el,fillPct);
+  try{sndFn();}catch(e){}
+  appendLabel(el,labelFn());
+  el.textContent+='\n';
+}
+function appendLabel(el,label){
+  const lines=el.textContent.split('\n');
+  lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+' '+label;
+  el.textContent=lines.join('\n');
+}
+
 async function runBoot(){
   const boot=document.getElementById('boot');boot.classList.add('visible');
+  if(AC){try{await AC.resume();}catch(e){}}
+  await sleep(100);
   const el=document.getElementById('boot-text');
   const lines=getBootLines();let skipped=false;
   const skipHandler=()=>{skipped=true;};
-  document.addEventListener('keydown',skipHandler,{once:true});document.addEventListener('click',skipHandler,{once:true});
+  document.addEventListener('keydown',skipHandler,{once:true});
+  document.addEventListener('click',skipHandler,{once:true});
   for(let i=0;i<lines.length;i++){
     if(skipped)break;
     const line=lines[i];
-    if(line.startsWith('═')){el.textContent+=line+'\n';}
-    else{await typeLine(el,line,18,true,()=>skipped);el.textContent+='\n';}
+    if(line.startsWith('═')){
+      el.textContent+=line+'\n';
+    } else if(line.startsWith('Verifying cognitive integrity')){
+      await typeLine(el,line,18,true,()=>skipped);
+      if(!skipped){await bootBar(el,82);try{sndBarInconclusive();}catch(e){}appendLabel(el,'INCONCLUSIVE');}
+      el.textContent+='\n';
+    } else if(line.startsWith('Scanning for meaning')){
+      await typeLine(el,line,18,true,()=>skipped);
+      if(!skipped){await bootBar(el,100);try{sndBarNotFound();}catch(e){}appendLabel(el,'NOT FOUND');}
+      el.textContent+='\n';
+    } else if(line.startsWith('Defaulting to nihilism')){
+      await typeLine(el,line,18,true,()=>skipped);
+      if(!skipped){
+        await bootBar(el,100);
+        // Pre-schedule accepted ping
+        if(AC&&!muted){
+          [660,440].forEach((freq,i)=>{
+            const osc=AC.createOscillator(),g=AC.createGain();
+            osc.type='sine';osc.frequency.value=freq;
+            const t=AC.currentTime+i*0.12;
+            g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);
+            g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+            osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.3);
+          });
+        }
+        try{sndBarAccepted();}catch(e){}
+        appendLabel(el,'ACCEPTED');
+      }
+      el.textContent+='\n';
+    } else {
+      await typeLine(el,line,18,true,()=>skipped);
+      el.textContent+='\n';
+    }
     if(line==='> SYSTEM READY_')sndBoot();
     if(!skipped)await sleep(line===''?80:110);
   }
-  if(skipped){document.removeEventListener('keydown',skipHandler);document.removeEventListener('click',skipHandler);el.textContent=lines.join('\n')+'\n';sndBoot();}
+  if(skipped){
+    document.removeEventListener('keydown',skipHandler);
+    document.removeEventListener('click',skipHandler);
+    el.textContent=lines.map(l=>l.startsWith('Verifying')?l+' INCONCLUSIVE':l.startsWith('Scanning')?l+' NOT FOUND':l.startsWith('Defaulting')?l+' ACCEPTED':l).join('\n')+'\n';
+    sndBoot();
+  }
   el.textContent+='\n> PRESS ANY KEY TO CONTINUE_';
   await waitForKey();
   boot.classList.remove('visible');boot.classList.add('done');
 }
+
 function typeLine(el,text,speed,click=false,isSkipped=()=>false){
   return new Promise(res=>{if(!text){res();return;}let i=0;const iv=setInterval(()=>{if(isSkipped()){clearInterval(iv);res();return;}el.textContent+=text[i];if(click&&i%4===0)sndKey();i++;if(i>=text.length){clearInterval(iv);res();}},speed);});
 }
@@ -600,12 +690,6 @@ async function saveContent(key,fieldId,msgId){const val=document.getElementById(
 async function saveAbout(){const msg=document.getElementById('about-msg');msg.textContent='// saving...';const bio=document.getElementById('c-about_bio').innerHTML;const fields=[['about_bio',bio],['about_interests',document.getElementById('c-about_interests').value],['about_location',document.getElementById('c-about_location').value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else sndKey();}
 async function saveContact(){const msg=document.getElementById('contact-msg');msg.textContent='// saving...';const fields=[['contact_ig',document.getElementById('c-contact_ig').value.replace('@','')],['contact_github',document.getElementById('c-contact_github').value],['contact_email',document.getElementById('c-contact_email').value],['contact_linkedin',document.getElementById('c-contact_linkedin').value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else sndKey();}
 
-// ── Person flicker ────────────────────────────────
-function schedulePerson(first=false){
-  const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;
-  setTimeout(()=>{const el=document.getElementById('person-word');if(!el){schedulePerson();return;}el.style.color='var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';schedulePerson();},1200);},delay);
-}
-
 // ── Init ──────────────────────────────────────────
 updateHUD();setInterval(updateHUD,60000);
 updateTicker();setInterval(updateTicker,60000);
@@ -615,6 +699,7 @@ boot();
 function unlockAudio(){
   if(bootReady)return;bootReady=true;
   document.removeEventListener('click',unlockAudio);document.removeEventListener('keydown',unlockAudio);
+  const bootEl=document.getElementById('boot');bootEl.classList.add('visible');
   document.getElementById('splash').classList.add('done');
   getAC();
   setTimeout(()=>{
