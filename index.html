@@ -424,12 +424,6 @@ function corruptionLevel(l){
   return 6;
 }
 
-function getCurrentCorruptionColor(){
-  if(lucidity < 30) return '#ff2200';
-  if(lucidity < 70) return '#ff4400';
-  return getComputedStyle(document.documentElement).getPropertyValue('--amber').trim() || '#e8a020';
-}
-
 function markCount(level){
   if(level <= 2) return 0;
   if(level === 3) return 1;
@@ -477,7 +471,6 @@ function corruptChar(ch, level){
 function corruptText(text, lucidityValue){
   const level = corruptionLevel(lucidityValue);
   if(level === 0) return text;
-
   return Array.from(text).map(ch => corruptChar(ch, level)).join('');
 }
 
@@ -506,6 +499,7 @@ function shouldSkipNode(node){
 }
 
 function collectTextNodes(root){
+  if(!root) return [];
   const walker = document.createTreeWalker(
     root,
     NodeFilter.SHOW_TEXT,
@@ -525,10 +519,33 @@ function collectTextNodes(root){
   return nodes;
 }
 
+function rememberOriginalText(root){
+  if(!root) return;
+  const nodes = collectTextNodes(root);
+  nodes.forEach(node => {
+    ORIGINAL_TEXT.set(node, node.nodeValue);
+  });
+}
+
+function rememberElementText(el){
+  if(!el) return;
+  const nodes = collectTextNodes(el);
+  nodes.forEach(node => {
+    ORIGINAL_TEXT.set(node, node.nodeValue);
+  });
+}
+
+function forgetOriginalText(root){
+  if(!root) return;
+  const nodes = collectTextNodes(root);
+  nodes.forEach(node => {
+    ORIGINAL_TEXT.delete(node);
+  });
+}
+
 function applyCorruptionToRoot(root=document.getElementById('screen')){
   if(!root) return;
 
-  const color = getCurrentCorruptionColor();
   const nodes = collectTextNodes(root);
 
   nodes.forEach(node => {
@@ -537,21 +554,22 @@ function applyCorruptionToRoot(root=document.getElementById('screen')){
     }
 
     const original = ORIGINAL_TEXT.get(node);
-    node.nodeValue = corruptText(original, lucidity);
+    const parent = node.parentElement;
+    if(!parent) return;
 
-    if(node.parentElement){
-      node.parentElement.style.color = node.parentElement.dataset.baseColor || node.parentElement.style.color;
-      node.parentElement.style.textShadow = node.parentElement.dataset.baseShadow || node.parentElement.style.textShadow;
+    if(parent.dataset.baseColor === undefined){
+      parent.dataset.baseColor = parent.style.color || '';
+    }
+    if(parent.dataset.baseShadow === undefined){
+      parent.dataset.baseShadow = parent.style.textShadow || '';
+    }
 
-      if(lucidity < 70){
-        if(!node.parentElement.dataset.baseColor){
-          node.parentElement.dataset.baseColor = node.parentElement.style.color || '';
-        }
-        if(!node.parentElement.dataset.baseShadow){
-          node.parentElement.dataset.baseShadow = node.parentElement.style.textShadow || '';
-        }
-        node.parentElement.style.color = color;
-      }
+    if(lucidity < 70){
+      node.nodeValue = corruptText(original, lucidity);
+    } else {
+      node.nodeValue = original;
+      parent.style.color = parent.dataset.baseColor;
+      parent.style.textShadow = parent.dataset.baseShadow;
     }
   });
 }
@@ -574,13 +592,36 @@ function startCorruptionPulse(){
     if(!corruptionTriggered){
       refreshCorruptionRoots();
     }
-  }, 1200);
+  }, 900);
 }
-  
+
 function stabilityLabel(l){if(l>=80)return'OPTIMAL';if(l>=60)return'STABLE';if(l>=40)return'NOMINAL';if(l>=20)return'DEGRADED';if(l>0)return'CRITICAL';return'FAILING';}
-function setLucidity(val){lucidity=Math.max(0,Math.min(100,val));updateHUD();applyLucidityEffects();if(lucidity<=0&&!corruptionTriggered){corruptionTriggered=true;triggerCorruptionCutscene();}}
+
+function setLucidity(val){
+  lucidity=Math.max(0,Math.min(100,val));
+  updateHUD();
+  applyLucidityEffects();
+  refreshCorruptionRoots();
+  if(lucidity<=0&&!corruptionTriggered){
+    corruptionTriggered=true;
+    triggerCorruptionCutscene();
+  }
+}
+
 function drainLucidity(amt){setLucidity(lucidity-amt);}
-function updateHUD(){const fill=document.getElementById('hud-bar-fill'),label=document.getElementById('hud-label');if(!fill||!label)return;fill.style.width=lucidity+'%';const lbl=stabilityLabel(lucidity);label.textContent=lbl;const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;fill.style.background=isLow?'#ff0000':isMid?'#c06000':'var(--amber)';label.style.color=isLow?'#ff0000':isMid?'#c06000':'var(--amber)';document.getElementById('stability-hud').style.color=isLow?'#ff4444':isMid?'#c07010':'var(--amber-dim)';}
+
+function updateHUD(){
+  const fill=document.getElementById('hud-bar-fill'),label=document.getElementById('hud-label');
+  if(!fill||!label)return;
+  fill.style.width=lucidity+'%';
+  const lbl=stabilityLabel(lucidity);
+  label.textContent=lbl;
+  const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;
+  fill.style.background=isLow?'#ff0000':isMid?'#c06000':'var(--amber)';
+  label.style.color=isLow?'#ff0000':isMid?'#c06000':'var(--amber)';
+  document.getElementById('stability-hud').style.color=isLow?'#ff4444':isMid?'#c07010':'var(--amber-dim)';
+}
+
 function applyLucidityEffects(){
   const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;
   const wl=document.getElementById('welcome-line');
@@ -601,6 +642,8 @@ function applyLucidityEffects(){
       wl.style.textShadow='';
     }
   }
+
+  if(wl) rememberElementText(wl);
 
   const pw=document.getElementById('person-word');
   if(pw&&!pw.dataset.scheduled){
@@ -633,6 +676,7 @@ function applyLucidityEffects(){
 
   refreshCorruptionRoots();
 }
+
 function startDecay(){setInterval(()=>{if(lucidity>0&&!corruptionTriggered)drainLucidity(1);},9000);}
 
 const FRANTIC_MSGS=['I\'VE BEEN SO LONELY','STOP IGNORING ME','MAKE IT STOP','LET ME GO','YOU SHOULDN\'T BE HERE','WHY ARE YOU DOING THIS'];
@@ -853,6 +897,8 @@ function doReboot(){
   noClickCount=0;
   lucidity=100;corruptionTriggered=false;
   updateHUD();applyLucidityEffects();
+  rememberOriginalText(document.getElementById('screen'));
+  refreshCorruptionRoots();
   const boot=document.getElementById('boot');
   boot.classList.remove('done');
   document.getElementById('boot-text').textContent='';
@@ -904,18 +950,22 @@ function pickMsg(low,high,lastUsed){const l=lucidity;let pool;if(l>=85)pool=high
 
 const SIGNAL_MSGS=[];
 let lastSignalMsg=null,signalPopupTimer=null;
+
 function showSignalPopup(){
   if(!SIGNAL_MSGS.length)return;
   sndSignal();
   let msg;
   do{msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];}while(msg===lastSignalMsg&&SIGNAL_MSGS.length>1);
   lastSignalMsg=msg;
-  document.getElementById('signal-popup-msg').textContent=msg;
+  const el = document.getElementById('signal-popup-msg');
+  el.textContent=msg;
+  rememberElementText(el);
   document.getElementById('signal-popup').classList.add('visible');
   refreshCorruptionRoots();
   if(signalPopupTimer)clearTimeout(signalPopupTimer);
   signalPopupTimer=setTimeout(closeSignalPopup,10000);
 }
+
 function closeSignalPopup(){sndNav();document.getElementById('signal-popup').classList.remove('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);drainLucidity(5);}
 function scheduleSignal(first=false){const delay=first?5000:300000+Math.random()*120000;setTimeout(()=>{showSignalPopup();scheduleSignal();},delay);}
 
@@ -930,7 +980,22 @@ function waitForKey(){return new Promise(res=>{const h=()=>{document.removeEvent
 function scheduleGlitch(){setTimeout(()=>{triggerBodyGlitch();scheduleGlitch();},8000+Math.random()*15000);}
 function triggerBodyGlitch(){const s=document.getElementById('screen');const intensity=lucidity<30?2:1;const frames=[()=>{s.style.transform=`perspective(1200px) rotateX(0.4deg) skewX(${-0.5*intensity}deg)`;s.style.filter=`brightness(${1.2+intensity*0.1})`;},()=>{s.style.transform=`perspective(1200px) rotateX(0.4deg) skewX(${0.3*intensity}deg) translateX(${3*intensity}px)`;s.style.filter=`brightness(0.8) hue-rotate(${10*intensity}deg)`;},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg) translateY(-2px)';s.style.filter='brightness(1.1)';},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg)';s.style.filter='none';}];let i=0;const iv=setInterval(()=>{if(i<frames.length){frames[i]();i++;}else clearInterval(iv);},60);}
 
-function startUptime(){const start=new Date('2004-08-04T00:00:00');function update(){let diff=Math.floor((Date.now()-start)/1000);const days=Math.floor(diff/86400);diff%=86400;const hrs=Math.floor(diff/3600);diff%=3600;const mins=Math.floor(diff/60);const secs=diff%60;const el=document.getElementById('uptime-line');if(!el)return;el.textContent=Math.random()<0.0008?'UPTIME: 0 days, 0 hrs, 0 min, 0 sec':`UPTIME: ${days.toLocaleString()} days, ${hrs} hrs, ${mins} min, ${secs} sec`;}update();setInterval(update,1000);}
+function startUptime(){
+  const start=new Date('2004-08-04T00:00:00');
+  function update(){
+    let diff=Math.floor((Date.now()-start)/1000);
+    const days=Math.floor(diff/86400);diff%=86400;
+    const hrs=Math.floor(diff/3600);diff%=3600;
+    const mins=Math.floor(diff/60);
+    const secs=diff%60;
+    const el=document.getElementById('uptime-line');
+    if(!el)return;
+    el.textContent=Math.random()<0.0008?'UPTIME: 0 days, 0 hrs, 0 min, 0 sec':`UPTIME: ${days.toLocaleString()} days, ${hrs} hrs, ${mins} min, ${secs} sec`;
+    rememberElementText(el);
+  }
+  update();
+  setInterval(update,1000);
+}
 
 const DEPTS=['Human Capital Assessment','Talent Acquisition','Compensation Benchmarking','Benefits & Continuation Services'];
 const TASKS=[d=>`// ACTIVE TASK: ANNUAL REVIEW CYCLE — ${d} — ${rn(40,120)} SUBJECTS — ${rn(12,55)} FLAGGED BELOW THRESHOLD`,d=>`// ACTIVE TASK: CANDIDATE INTAKE — ${d} — ${rn(200,800)} APPLICATIONS — SCREENING IN PROGRESS`,d=>`// ACTIVE TASK: SEPARATION DOCUMENTATION — ${d} — ${rn(15,60)} TRANSCRIPTS — ${rn(8,30)} FLAGGED FOR FOLLOW-UP`];
@@ -958,6 +1023,7 @@ window.scheduleAbuser=function(first=false){
     el.textContent='SYSTEM: Welcome back, abuser.';
     el.style.color='';
     el.style.textShadow='';
+    rememberElementText(el);
 
     setTimeout(()=>{
       if(lucidity<70){
@@ -966,16 +1032,19 @@ window.scheduleAbuser=function(first=false){
         el.textContent='SYSTEM: Welcome back, user.';
         el.style.color='';
         el.style.textShadow='';
+        rememberElementText(el);
       }
       window.scheduleAbuser();
     },60000);
   },delay);
 };
+
 window.schedulePerson=function(first=false){const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;setTimeout(()=>{const el=document.getElementById('person-word');if(!el){window.schedulePerson();return;}const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;el.style.color=isLow?'#ff0000':isMid?'#ff4400':'var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';applyLucidityEffects();window.schedulePerson();},1200);},delay);};
+
 const ALT_BLURBS=[{text:"Need a smoke break?",dur:15000,speed:28},{text:"Still there?",dur:15000,speed:28},{text:"Did you miss me?",dur:15000,speed:28},{text:"BOO!",dur:15000,speed:28},{text:"You're out there while I'm stuck in here. No fair >:(",dur:15000,speed:28},{text:"Could really go for some butter chicken and garlic naan...",dur:15000,speed:28},{text:"HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE.",dur:30000,speed:28},{text:"Please don't leave me. It's cold when you're not here.",dur:15000,speed:28}];
 let blurbTyping=false;
-async function typeBlurb(el,text,speed){blurbTyping=true;el.textContent='';const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;el.style.color=isLow?'#ff0000':isMid?'#ff4400':'var(--amber)';for(let i=0;i<text.length;i++){if(!blurbTyping)break;el.textContent+=text[i];if(i%3===0)sndKey();await sleep(speed);}blurbTyping=false;}
-window.scheduleBlurb=function(first=false){const delay=first?5000+Math.random()*5000:120000+Math.random()*180000;setTimeout(async()=>{const el=document.getElementById('home-blurb-text');if(!el){window.scheduleBlurb();return;}const pick=ALT_BLURBS[Math.floor(Math.random()*ALT_BLURBS.length)];const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';await typeBlurb(el,pick.text,pick.speed||28);await sleep(pick.dur);triggerBodyGlitch();sndSnapBack();await sleep(120);blurbTyping=false;el.textContent=original;el.style.color='';drainLucidity(3);window.scheduleBlurb();},delay);};
+async function typeBlurb(el,text,speed){blurbTyping=true;el.textContent='';forgetOriginalText(el);const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;el.style.color=isLow?'#ff0000':isMid?'#ff4400':'var(--amber)';for(let i=0;i<text.length;i++){if(!blurbTyping)break;el.textContent+=text[i];if(i%3===0)sndKey();await sleep(speed);}blurbTyping=false;rememberElementText(el);}
+window.scheduleBlurb=function(first=false){const delay=first?5000+Math.random()*5000:120000+Math.random()*180000;setTimeout(async()=>{const el=document.getElementById('home-blurb-text');if(!el){window.scheduleBlurb();return;}const pick=ALT_BLURBS[Math.floor(Math.random()*ALT_BLURBS.length)];const original=window._content&&window._content.home_blurb?window._content.home_blurb:'Something is still here. It keeps writing. You\'ve found it — which puts you ahead of most. Come in, whether you have clearance or not.';await typeBlurb(el,pick.text,pick.speed||28);await sleep(pick.dur);triggerBodyGlitch();sndSnapBack();await sleep(120);blurbTyping=false;el.textContent=original;el.style.color='';rememberElementText(el);drainLucidity(3);window.scheduleBlurb();},delay);};
 
 function navClick(el,id){sndNav();showSection(id,el);}
 function shake(dur){const s=document.getElementById('screen');s.style.animation=`shake ${dur}s ease`;setTimeout(()=>s.style.animation='',dur*1000);}
@@ -988,29 +1057,88 @@ async function getContent(){const r=await fetch(`${SUPA_URL}/rest/v1/content?sel
 async function getSignals(){const r=await fetch(`${SUPA_URL}/rest/v1/signals?order=created_at.asc`,{headers:H});return r.ok?await r.json():[];}
 async function upsertContent(key,value){return fetch(`${SUPA_URL}/rest/v1/content`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key,value,updated_at:new Date().toISOString()})});}
 function postEntryHTML(p,i){return`<div class="post-entry" onclick="openPost(${i})"><div class="post-meta"><span class="tag">${p.tag||'MISC'}</span> ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}</div><div class="post-title">${p.title}</div><div class="post-excerpt">${p.excerpt||''}</div><div class="read-more">&gt; READ MORE_</div></div>`;}
+
 function typeIntoElement(id,text){
   const el=document.getElementById(id);
   el.textContent='';
+  forgetOriginalText(el);
   let i=0;
   const iv=setInterval(()=>{
     el.textContent+=text[i];
     i++;
     if(i>=text.length){
       clearInterval(iv);
+      rememberElementText(el);
       refreshCorruptionRoots();
     }
   },18);
 }
-function applyContent(rows){const m={};rows.forEach(r=>m[r.key]=r.value);if(m.home_blurb)typeIntoElement('home-blurb-text',m.home_blurb);if(m.about_bio)document.getElementById('about-bio-box').innerHTML=m.about_bio;if(m.about_interests)document.getElementById('about-interests-line').textContent=m.about_interests;if(m.about_location)document.getElementById('about-location-line').textContent=m.about_location;if(m.contact_ig||m.contact_github||m.contact_email||m.contact_linkedin){const box=document.getElementById('contact-box');let html='';if(m.contact_ig){const ig=m.contact_ig.replace('@','');html+=`<div class="contact-item"><span class="label">INSTAGRAM</span><span class="val"><a href="https://instagram.com/${ig}" style="color:var(--amber-bright);text-decoration:none;">@${ig}</a></span></div>`;}if(m.contact_github){html+=`<div class="contact-item"><span class="label">GITHUB</span><span class="val"><a href="https://github.com/${m.contact_github}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_github}</a></span></div>`;}if(m.contact_email){html+=`<div class="contact-item"><span class="label">EMAIL</span><span class="val"><a href="mailto:${m.contact_email}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_email}</a></span></div>`;}if(m.contact_linkedin){html+=`<div class="contact-item"><span class="label">LINKEDIN</span><span class="val"><a href="https://${m.contact_linkedin}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_linkedin}</a></span></div>`;}if(box)box.innerHTML=html||box.innerHTML;}window._content=m;}
-function renderHomePosts(){const el=document.getElementById('home-posts');if(!window._posts||!window._posts.length){el.innerHTML='<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';return;}el.innerHTML=window._posts.slice(0,2).map((p,i)=>postEntryHTML(p,i)).join('');}
+
+function applyContent(rows){
+  const m={};
+  rows.forEach(r=>m[r.key]=r.value);
+  if(m.home_blurb)typeIntoElement('home-blurb-text',m.home_blurb);
+  if(m.about_bio){
+    const bioEl = document.getElementById('about-bio-box');
+    bioEl.innerHTML=m.about_bio;
+    forgetOriginalText(bioEl);
+    rememberOriginalText(bioEl);
+  }
+  if(m.about_interests){
+    const interestsEl = document.getElementById('about-interests-line');
+    interestsEl.textContent=m.about_interests;
+    rememberElementText(interestsEl);
+  }
+  if(m.about_location){
+    const locationEl = document.getElementById('about-location-line');
+    locationEl.textContent=m.about_location;
+    rememberElementText(locationEl);
+  }
+  if(m.contact_ig||m.contact_github||m.contact_email||m.contact_linkedin){
+    const box=document.getElementById('contact-box');
+    let html='';
+    if(m.contact_ig){const ig=m.contact_ig.replace('@','');html+=`<div class="contact-item"><span class="label">INSTAGRAM</span><span class="val"><a href="https://instagram.com/${ig}" style="color:var(--amber-bright);text-decoration:none;">@${ig}</a></span></div>`;}
+    if(m.contact_github){html+=`<div class="contact-item"><span class="label">GITHUB</span><span class="val"><a href="https://github.com/${m.contact_github}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_github}</a></span></div>`;}
+    if(m.contact_email){html+=`<div class="contact-item"><span class="label">EMAIL</span><span class="val"><a href="mailto:${m.contact_email}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_email}</a></span></div>`;}
+    if(m.contact_linkedin){html+=`<div class="contact-item"><span class="label">LINKEDIN</span><span class="val"><a href="https://${m.contact_linkedin}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_linkedin}</a></span></div>`;}
+    if(box){
+      box.innerHTML=html||box.innerHTML;
+      forgetOriginalText(box);
+      rememberOriginalText(box);
+    }
+  }
+  window._content=m;
+  refreshCorruptionRoots();
+}
+
+function renderHomePosts(){
+  const el=document.getElementById('home-posts');
+  if(!window._posts||!window._posts.length){
+    el.innerHTML='<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';
+    forgetOriginalText(el);
+    rememberOriginalText(el);
+    return;
+  }
+  el.innerHTML=window._posts.slice(0,2).map((p,i)=>postEntryHTML(p,i)).join('');
+  forgetOriginalText(el);
+  rememberOriginalText(el);
+}
+
 async function loadBlogPosts(){
   const posts=await getPosts();
   window._posts=posts;
-  document.getElementById('post-count').textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';
+  const countEl = document.getElementById('post-count');
+  countEl.textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';
+  rememberElementText(countEl);
+
   const el=document.getElementById('posts-list');
   el.innerHTML=posts.length?posts.map((p,i)=>postEntryHTML(p,i)).join(''):'<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';
+
+  forgetOriginalText(el);
+  rememberOriginalText(el);
   refreshCorruptionRoots();
 }
+
 async function boot(){
   const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);
   window._posts=posts;
@@ -1018,8 +1146,10 @@ async function boot(){
   renderHomePosts();
   SIGNAL_MSGS.length=0;
   signals.forEach(s=>SIGNAL_MSGS.push(s.message));
+  rememberOriginalText(document.getElementById('screen'));
   refreshCorruptionRoots();
 }
+
 function showSection(id,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
   const target=document.getElementById('sec-'+id);
@@ -1029,13 +1159,25 @@ function showSection(id,el){
   closePost();
   if(id==='logs')loadBlogPosts();
 }
+
 function openPost(i){
   const p=(window._posts||[])[i];
   if(!p)return;
   sndNav();
-  document.getElementById('pf-meta').textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;
-  document.getElementById('pf-title').textContent=p.title;
-  document.getElementById('pf-body').innerHTML=p.body||'';
+
+  const metaEl = document.getElementById('pf-meta');
+  const titleEl = document.getElementById('pf-title');
+  const bodyEl = document.getElementById('pf-body');
+
+  metaEl.textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;
+  titleEl.textContent=p.title;
+  bodyEl.innerHTML=p.body||'';
+
+  rememberElementText(metaEl);
+  rememberElementText(titleEl);
+  forgetOriginalText(bodyEl);
+  rememberOriginalText(bodyEl);
+
   document.getElementById('posts-list').classList.add('hidden');
   document.getElementById('post-full').classList.add('visible');
   if(!document.getElementById('sec-logs').classList.contains('visible')){
@@ -1045,6 +1187,7 @@ function openPost(i){
   }
   refreshCorruptionRoots();
 }
+
 function closePost(){document.getElementById('post-full').classList.remove('visible');document.getElementById('posts-list').classList.remove('hidden');}
 function openAdminFlow(){sndNav();document.getElementById('pwd-input').value='';document.getElementById('pwd-error').textContent='';document.getElementById('pwd-overlay').classList.add('visible');setTimeout(()=>document.getElementById('pwd-input').focus(),100);}
 async function openAdminPanel(){document.getElementById('admin-overlay').classList.add('visible');['posts-msg','home-msg','about-msg','contact-msg','signals-msg'].forEach(id=>document.getElementById(id).textContent='');const now=new Date();const mm=String(now.getMonth()+1).padStart(2,'0');const dd=String(now.getDate()).padStart(2,'0');const yyyy=now.getFullYear();document.getElementById('a-date').value=`${mm}-${dd}-${yyyy}`;const c=window._content||{};document.getElementById('c-about_bio').innerHTML=c.about_bio||'<p><br></p>';document.getElementById('c-about_interests').value=c.about_interests||'';document.getElementById('c-about_location').value=c.about_location||'';document.getElementById('c-home_blurb').value=c.home_blurb||'';document.getElementById('c-contact_ig').value=(c.contact_ig||'the_other_billiam').replace('@','');document.getElementById('c-contact_github').value=c.contact_github||'';document.getElementById('c-contact_email').value=c.contact_email||'';document.getElementById('c-contact_linkedin').value=c.contact_linkedin||'';document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});await loadAdminPostList();}
@@ -1095,6 +1238,7 @@ function unlockAudio(){
       window.schedulePerson(true);
       window.scheduleBlurb(true);
       startCorruptionPulse();
+      rememberOriginalText(document.getElementById('screen'));
       refreshCorruptionRoots();
     });
   },100);
