@@ -810,15 +810,19 @@ let blurbOverrideActive=false;
 
 function updateBlurbForStage(){
   if(blurbTyping||blurbOverrideActive)return;
+
   const stage=getStage(lucidity);
   const c=window._content||{};
   const suffix=stage==='high'?'':'_'+stage;
   const blurb=c['home_blurb'+suffix]||DEFAULT_BLURB[stage];
   const el=document.getElementById('home-blurb-text');
-  if(el&&el.textContent!==blurb){
-    el.textContent=blurb;
-    rememberElementText(el);
-  }
+
+  if(!el) return;
+
+  el.textContent=blurb;
+  el.style.color='';
+  el.style.textShadow='';
+  rememberElementText(el);
 }
 
 function setHomeCue(on){
@@ -1055,6 +1059,7 @@ async function triggerCorruptionCutscene(){
   blurbOverrideActive=false;
   blurbTyping=false;
   setHomeCue(false);
+  resetHomeBlurbVisualState();
 
   if(signalTimer){
     clearTimeout(signalTimer);
@@ -1238,6 +1243,7 @@ function doReboot(){
   blurbOverrideActive=false;
   blurbTyping=false;
   setHomeCue(false);
+  resetHomeBlurbVisualState();
   resetAllCorruptedText(document.getElementById('screen'));
   updateHUD();
   applyLucidityEffects();
@@ -1290,6 +1296,12 @@ function appendLabel(el,label){const lines=el.textContent.split('\n');lines[line
 async function runBoot(){const boot=document.getElementById('boot');boot.classList.add('visible');if(AC){try{await AC.resume();}catch(e){}}await sleep(100);const el=document.getElementById('boot-text');const lines=getBootLines();let skipped=false;const skipHandler=()=>{skipped=true;};document.addEventListener('keydown',skipHandler,{once:true});document.addEventListener('click',skipHandler,{once:true});for(let i=0;i<lines.length;i++){if(skipped)break;const line=lines[i];if(line.startsWith('═')){el.textContent+=line+'\n';}else if(line.startsWith('Verifying cognitive integrity')){await typeLine(el,line,18,true,()=>skipped);if(!skipped){await bootBar(el,82);try{sndBarInconclusive();}catch(e){}}appendLabel(el,'INCONCLUSIVE');el.textContent+='\n';}else if(line.startsWith('Scanning for meaning')){await typeLine(el,line,18,true,()=>skipped);if(!skipped){await bootBar(el,100);try{sndBarNotFound();}catch(e){}}appendLabel(el,'NOT FOUND');el.textContent+='\n';}else if(line.startsWith('Defaulting to nihilism')){await typeLine(el,line,18,true,()=>skipped);if(!skipped){await bootBar(el,100);if(AC&&!muted){[660,440].forEach((freq,j)=>{const osc=AC.createOscillator(),g=AC.createGain();osc.type='sine';osc.frequency.value=freq;const t=AC.currentTime+j*0.12;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.1,t+0.02);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.3);});}}appendLabel(el,'ACCEPTED');el.textContent+='\n';}else{await typeLine(el,line,18,true,()=>skipped);el.textContent+='\n';}if(line==='> SYSTEM READY_')sndBoot();if(!skipped)await sleep(line===''?80:110);}if(skipped){document.removeEventListener('keydown',skipHandler);document.removeEventListener('click',skipHandler);el.textContent=lines.map(l=>l.startsWith('Verifying')?l+' INCONCLUSIVE':l.startsWith('Scanning')?l+' NOT FOUND':l.startsWith('Defaulting')?l+' ACCEPTED':l).join('\n')+'\n';sndBoot();}el.textContent+='\n> PRESS ANY KEY TO CONTINUE_';await waitForKey();boot.classList.remove('visible');boot.classList.add('done');}
 function typeLine(el,text,speed,click=false,isSkipped=()=>false){return new Promise(res=>{if(!text){res();return;}let i=0;const iv=setInterval(()=>{if(isSkipped()){clearInterval(iv);res();return;}el.textContent+=text[i];if(click&&i%4===0)sndKey();i++;if(i>=text.length){clearInterval(iv);res();}},speed);});}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function resetHomeBlurbVisualState(){
+  const el=document.getElementById('home-blurb-text');
+  if(!el) return;
+  el.style.color='';
+  el.style.textShadow='';
+}
 function waitForKey(){return new Promise(res=>{const h=()=>{document.removeEventListener('keydown',h);document.removeEventListener('click',h);res();};document.addEventListener('keydown',h);document.addEventListener('click',h);});}
 
 function scheduleGlitch(){setTimeout(()=>{triggerBodyGlitch();scheduleGlitch();},8000+Math.random()*15000);}
