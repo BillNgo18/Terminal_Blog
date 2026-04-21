@@ -68,7 +68,7 @@
   @keyframes blink{50%{opacity:0;}}
   @keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.7}94%{opacity:1}96%{opacity:0.85}97%{opacity:1}}
   @keyframes shake{0%,100%{transform:perspective(1200px) rotateX(0.4deg) translate(0,0)}10%{transform:perspective(1200px) rotateX(0.4deg) translate(-4px,2px) skewX(-1deg)}20%{transform:perspective(1200px) rotateX(0.4deg) translate(4px,-2px) skewX(0.5deg)}30%{transform:perspective(1200px) rotateX(0.4deg) translate(-3px,1px)}50%{transform:perspective(1200px) rotateX(0.4deg) translate(-2px,-1px)}70%{transform:perspective(1200px) rotateX(0.4deg) translate(-1px,-2px)}90%{transform:perspective(1200px) rotateX(0.4deg) translate(-1px,0)}}
-  @keyframes redpulse{0%,100%{color:#ff0000}50%{color:#ff6666}}
+  @keyframes redpulse{0%,100%{color:#ff0000}50%{color:#ff6666;}}
 
   @keyframes homeCuePulseAmber{
     0%,100%{box-shadow:0 0 0 rgba(255,170,51,0), inset 0 0 0 rgba(255,170,51,0);filter:none;}
@@ -499,8 +499,13 @@ let lucidity=100,corruptionTriggered=false;
 let lastNarrativeEventAt=0;
 let lastNarrativeEventType=null;
 const NARRATIVE_STAGGER_MS=5000;
+let narrativeSuspended=false;
+let signalTimer=null;
+let currentSignalStage=getStage(lucidity);
 
 function gateNarrativeEvent(kind, fn){
+  if(narrativeSuspended) return;
+
   const stage=getStage(lucidity);
 
   if(stage==='low'){
@@ -512,7 +517,11 @@ function gateNarrativeEvent(kind, fn){
   const since=now-lastNarrativeEventAt;
 
   if(lastNarrativeEventType && lastNarrativeEventType!==kind && since<NARRATIVE_STAGGER_MS){
-    setTimeout(()=>gateNarrativeEvent(kind,fn),NARRATIVE_STAGGER_MS-since);
+    setTimeout(()=>{
+      if(!narrativeSuspended){
+        gateNarrativeEvent(kind,fn);
+      }
+    },NARRATIVE_STAGGER_MS-since);
     return;
   }
 
@@ -755,6 +764,14 @@ function applyLucidityEffects(){
   updateSignalPopupStyle();
 }
 
+function refreshSignalScheduleForStageChange(){
+  const stage=getStage(lucidity);
+  if(stage!==currentSignalStage){
+    currentSignalStage=stage;
+    scheduleSignal(false);
+  }
+}
+
 function setLucidity(val){
   lucidity=Math.max(0,Math.min(100,val));
   updateHUD();
@@ -763,7 +780,12 @@ function setLucidity(val){
   updateAboutForStage();
   updateBlurbForStage();
   refreshCorruptionRoots();
-  if(lucidity<=0&&!corruptionTriggered){corruptionTriggered=true;triggerCorruptionCutscene();}
+  refreshSignalScheduleForStageChange();
+
+  if(lucidity<=0&&!corruptionTriggered){
+    corruptionTriggered=true;
+    triggerCorruptionCutscene();
+  }
 }
 function drainLucidity(amt){setLucidity(lucidity-amt);}
 function startDecay(){setInterval(()=>{if(lucidity>0&&!corruptionTriggered)drainLucidity(1);},9000);}
@@ -885,7 +907,17 @@ async function typeBlurb(el,text,speed){
 
 window.scheduleBlurb=function(first=false){
   setTimeout(()=>{
+    if(narrativeSuspended){
+      window.scheduleBlurb(false);
+      return;
+    }
+
     gateNarrativeEvent('blurb', async ()=>{
+      if(narrativeSuspended){
+        window.scheduleBlurb(false);
+        return;
+      }
+
       const el=document.getElementById('home-blurb-text');
       if(!el){
         window.scheduleBlurb();
@@ -908,9 +940,20 @@ window.scheduleBlurb=function(first=false){
 
       await typeBlurb(el,pick.text,pick.speed||28);
 
+      if(narrativeSuspended){
+        blurbOverrideActive=false;
+        setHomeCue(false);
+        return;
+      }
+
       setHomeCue(false);
 
       await sleep(15000);
+
+      if(narrativeSuspended){
+        blurbOverrideActive=false;
+        return;
+      }
 
       sndSnapBack();
       el.textContent=original;
@@ -963,14 +1006,30 @@ function showSignalPopup(){
   signalPopupTimer=setTimeout(closeSignalPopup,10000);
 }
 
-function closeSignalPopup(){sndNav();document.getElementById('signal-popup').classList.remove('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);drainLucidity(5);}
+function closeSignalPopup(){
+  sndNav();
+  document.getElementById('signal-popup').classList.remove('visible');
+  if(signalPopupTimer)clearTimeout(signalPopupTimer);
+  signalPopupTimer=null;
+  drainLucidity(5);
+}
+
 function scheduleSignal(first=false){
-  setTimeout(()=>{
+  if(signalTimer) clearTimeout(signalTimer);
+  if(narrativeSuspended) return;
+
+  const delay=getSignalDelay(first);
+
+  signalTimer=setTimeout(()=>{
+    if(narrativeSuspended) return;
+
     gateNarrativeEvent('signal', ()=>{
+      if(narrativeSuspended) return;
       showSignalPopup();
-      scheduleSignal();
+      currentSignalStage=getStage(lucidity);
+      scheduleSignal(false);
     });
-  },getSignalDelay(first));
+  },delay);
 }
 
 const FRANTIC_MSGS=['I\'VE BEEN SO LONELY','STOP IGNORING ME','MAKE IT STOP','LET ME GO','YOU SHOULDN\'T BE HERE','WHY ARE YOU DOING THIS'];
@@ -992,35 +1051,82 @@ function makeFranticBox(fc,top,left,size,msg,delay){
 }
 
 async function triggerCorruptionCutscene(){
-  const caret=document.getElementById('fake-caret');caret.style.display='none';caret.style.visibility='hidden';
+  narrativeSuspended=true;
+  blurbOverrideActive=false;
+  blurbTyping=false;
+  setHomeCue(false);
+
+  if(signalTimer){
+    clearTimeout(signalTimer);
+    signalTimer=null;
+  }
+
+  if(signalPopupTimer){
+    clearTimeout(signalPopupTimer);
+    signalPopupTimer=null;
+  }
+
+  document.getElementById('signal-popup').classList.remove('visible');
+
+  const caret=document.getElementById('fake-caret');
+  caret.style.display='none';
+  caret.style.visibility='hidden';
+
   const overlay=document.getElementById('corruption-overlay');
-  overlay.classList.add('active');overlay.style.transition='background 1s';overlay.style.background='rgba(120,0,0,0.35)';
+  overlay.classList.add('active');
+  overlay.style.transition='background 1s';
+  overlay.style.background='rgba(120,0,0,0.35)';
   await sleep(1000);
-  const fc=document.getElementById('frantic-container');fc.style.display='block';franticActive=true;franticBoxes=[];
-  franticCenterBox=document.createElement('div');franticCenterBox.className='frantic-box';
+
+  const fc=document.getElementById('frantic-container');
+  fc.style.display='block';
+  franticActive=true;
+  franticBoxes=[];
+
+  franticCenterBox=document.createElement('div');
+  franticCenterBox.className='frantic-box';
   franticCenterBox.style.cssText='top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;animation:redpulse 0.35s infinite;opacity:0;transition:opacity 0.25s;z-index:803;';
   franticCenterBox.textContent=pickFranticMsg(null);
   fc.appendChild(franticCenterBox);
   setTimeout(()=>{franticCenterBox.style.opacity='1';sndDenied();},200);
-  for(let i=0;i<8;i++){const s=FRANTIC_PERIMETER[i];franticBoxes.push(makeFranticBox(fc,s.top,s.left,s.size,pickFranticMsg(null),400+i*350));}
+
+  for(let i=0;i<8;i++){
+    const s=FRANTIC_PERIMETER[i];
+    franticBoxes.push(makeFranticBox(fc,s.top,s.left,s.size,pickFranticMsg(null),400+i*350));
+  }
+
   franticCycleTimer=setInterval(()=>{
     if(!franticActive||!franticCenterBox)return;
     const next=pickFranticMsg(franticCenterBox.textContent);
     franticCenterBox.style.opacity='0';
-    setTimeout(()=>{if(franticCenterBox){franticCenterBox.textContent=next;franticCenterBox.style.opacity='1';sndDenied();}},200);
+    setTimeout(()=>{
+      if(franticCenterBox){
+        franticCenterBox.textContent=next;
+        franticCenterBox.style.opacity='1';
+        sndDenied();
+      }
+    },200);
   },1400);
 
-  const cc=document.getElementById('corruption-chars');const total=300;
+  const cc=document.getElementById('corruption-chars');
+  const total=300;
+
   if(AC&&!muted){
     let t=AC.currentTime+0.05;
     for(let i=0;i<total;i++){
       const osc=AC.createOscillator(),g=AC.createGain();
-      osc.type='sine';osc.frequency.value=80+Math.random()*60;
-      g.gain.setValueAtTime(0.15,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
-      osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.05);
+      osc.type='sine';
+      osc.frequency.value=80+Math.random()*60;
+      g.gain.setValueAtTime(0.15,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+      osc.connect(g);
+      g.connect(AC.destination);
+      osc.start(t);
+      osc.stop(t+0.05);
       t+=0.015+Math.random()*0.03;
     }
   }
+
   for(let i=0;i<total;i++){
     setTimeout(()=>{
       const ch=document.createElement('span');
@@ -1036,34 +1142,58 @@ async function triggerCorruptionCutscene(){
       cc.appendChild(ch);
     },i*20+Math.random()*15);
   }
+
   await sleep(total*20+1500);
-  franticActive=false;if(franticCycleTimer){clearInterval(franticCycleTimer);franticCycleTimer=null;}
+
+  franticActive=false;
+  if(franticCycleTimer){
+    clearInterval(franticCycleTimer);
+    franticCycleTimer=null;
+  }
+
   document.getElementById('reboot-overlay').classList.add('visible');
   document.getElementById('reboot-no-btn').classList.remove('hidden');
 }
 
 let noClickCount=0;
 function buildYesGrid(mode){
-  const zone=document.getElementById('reboot-yes-zone');zone.innerHTML='';zone.classList.add('active');zone.style.cssText='position:fixed;inset:0;pointer-events:none;';
+  const zone=document.getElementById('reboot-yes-zone');
+  zone.innerHTML='';
+  zone.classList.add('active');
+  zone.style.cssText='position:fixed;inset:0;pointer-events:none;';
   const btnW=90,btnH=32,gap=4;
+
   if(mode===1){
     zone.style.zIndex='906';
     const cols=5,rows=4,gridW=cols*(btnW+gap),gridH=rows*(btnH+gap);
-    const startX=Math.max(0,(window.innerWidth-gridW)/2),startY=Math.max(0,(window.innerHeight-gridH)/2);let idx=0;
+    const startX=Math.max(0,(window.innerWidth-gridW)/2),startY=Math.max(0,(window.innerHeight-gridH)/2);
+    let idx=0;
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const btn=document.createElement('button');btn.className='yes-btn';btn.textContent='[ YES ]';btn.onclick=doReboot;
+      const btn=document.createElement('button');
+      btn.className='yes-btn';
+      btn.textContent='[ YES ]';
+      btn.onclick=doReboot;
       btn.style.cssText=`left:${startX+c*(btnW+gap)}px;top:${startY+r*(btnH+gap)}px;width:${btnW}px;height:${btnH}px;opacity:0;transition:opacity 0.1s;pointer-events:all;`;
-      setTimeout(()=>{btn.style.opacity='1';if(idx%4===0)sndDenied();},idx*30);zone.appendChild(btn);idx++;
+      setTimeout(()=>{btn.style.opacity='1';if(idx%4===0)sndDenied();},idx*30);
+      zone.appendChild(btn);
+      idx++;
     }
   } else if(mode===2){
     zone.style.zIndex='901';
     const vw=window.innerWidth,vh=window.innerHeight,safeX=(vw-640)/2,safeY=(vh-320)/2,safeX2=safeX+640,safeY2=safeY+320;
-    const cols=Math.floor(vw/(btnW+gap)),rows=Math.floor(vh/(btnH+gap));let idx=0;
+    const cols=Math.floor(vw/(btnW+gap)),rows=Math.floor(vh/(btnH+gap));
+    let idx=0;
     for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const x=c*(btnW+gap),y=r*(btnH+gap);if(x+btnW>safeX&&x<safeX2&&y+btnH>safeY&&y<safeY2)continue;
-      const btn=document.createElement('button');btn.className='yes-btn';btn.textContent='[ YES ]';btn.onclick=doReboot;
+      const x=c*(btnW+gap),y=r*(btnH+gap);
+      if(x+btnW>safeX&&x<safeX2&&y+btnH>safeY&&y<safeY2)continue;
+      const btn=document.createElement('button');
+      btn.className='yes-btn';
+      btn.textContent='[ YES ]';
+      btn.onclick=doReboot;
       btn.style.cssText=`left:${x}px;top:${y}px;width:${btnW}px;height:${btnH}px;opacity:0;transition:opacity 0.06s;pointer-events:all;`;
-      setTimeout(()=>{btn.style.opacity='1';if(idx%10===0)sndDenied();},idx*12);zone.appendChild(btn);idx++;
+      setTimeout(()=>{btn.style.opacity='1';if(idx%10===0)sndDenied();},idx*12);
+      zone.appendChild(btn);
+      idx++;
     }
   }
 }
@@ -1075,16 +1205,36 @@ function doReboot(){
   document.getElementById('reboot-overlay').classList.remove('visible');
   document.getElementById('reboot-no-btn').classList.remove('hidden');
   document.getElementById('reboot-big-yes').style.display='none';
-  const zone=document.getElementById('reboot-yes-zone');zone.innerHTML='';zone.classList.remove('active');zone.style.cssText='';
+  const zone=document.getElementById('reboot-yes-zone');
+  zone.innerHTML='';
+  zone.classList.remove('active');
+  zone.style.cssText='';
   document.getElementById('corruption-overlay').classList.remove('active');
   document.getElementById('corruption-chars').innerHTML='';
   document.getElementById('frantic-container').innerHTML='';
   document.getElementById('frantic-container').style.display='none';
   closeAdmin();
-  const caret=document.getElementById('fake-caret');caret.style.visibility='';
+  const caret=document.getElementById('fake-caret');
+  caret.style.visibility='';
   showSection('home',document.querySelector('nav a'));
   noClickCount=0;
-  lucidity=100;corruptionTriggered=false;
+  lucidity=100;
+  corruptionTriggered=false;
+  narrativeSuspended=false;
+  currentSignalStage=getStage(lucidity);
+
+  if(signalTimer){
+    clearTimeout(signalTimer);
+    signalTimer=null;
+  }
+
+  if(signalPopupTimer){
+    clearTimeout(signalPopupTimer);
+    signalPopupTimer=null;
+  }
+
+  document.getElementById('signal-popup').classList.remove('visible');
+
   blurbOverrideActive=false;
   blurbTyping=false;
   setHomeCue(false);
@@ -1259,7 +1409,35 @@ async function openAdminPanel(){
 function switchTab(name){sndKey();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='signals')loadAdminSignalList('high');}
 function switchSubtab(tab,stage){sndKey();document.querySelectorAll(`#tab-${tab} .subtab-panel`).forEach(p=>p.classList.remove('active'));document.querySelectorAll(`#tab-${tab} .subtab`).forEach(t=>t.classList.remove('active'));document.getElementById(`${tab}-subtab-${stage}`).classList.add('active');document.querySelector(`#tab-${tab} .subtab[onclick="switchSubtab('${tab}','${stage}')"]`).classList.add('active');if(tab==='signals')loadAdminSignalList(stage);}
 async function loadAdminPostList(){const posts=await getPosts();const el=document.getElementById('admin-post-list');if(!posts.length){el.innerHTML='<div class="sys-line">// no posts yet</div>';return;}el.innerHTML=posts.map(p=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;"><button class="delete-btn" onclick="deletePost('${p.id}')">[ DELETE ]</button><span style="color:var(--amber-bright);">${p.title}</span><span style="color:var(--amber-dim);margin-left:8px;">${p.date||''}</span></div>`).join('');}
-async function loadAdminSignalList(stage='high'){const sigs=await getSignals();const filtered=sigs.filter(s=>(s.stage||'high')===stage);const el=document.getElementById(`admin-signal-list-${stage}`);if(!el)return;if(!filtered.length){el.innerHTML='<div class="sys-line">// no signals yet</div>';return;}el.innerHTML=filtered.map(s=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span style="color:#c07010;flex:1;">${s.message}</span><button class="delete-btn" style="flex-shrink:0;" onclick="deleteSignal('${s.id}','${stage}')">[ DELETE ]</button></div>`).join('');}
+async function loadAdminSignalList(stage='high'){
+  const sigs=await getSignals();
+  const filtered=sigs.filter(s=>(s.stage||'high')===stage);
+  const el=document.getElementById(`admin-signal-list-${stage}`);
+  if(!el)return;
+
+  if(filtered.length){
+    el.innerHTML=filtered.map(s=>`
+      <div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <span style="color:#c07010;flex:1;">${s.message}</span>
+        <button class="delete-btn" style="flex-shrink:0;" onclick="deleteSignal('${s.id}','${stage}')">[ DELETE ]</button>
+      </div>
+    `).join('');
+    return;
+  }
+
+  const fallback=(DEFAULT_SIGNALS[stage]||[]);
+  if(fallback.length){
+    el.innerHTML=fallback.map(msg=>`
+      <div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;opacity:0.85;">
+        <span style="color:#c07010;flex:1;">${msg}</span>
+        <span style="color:var(--amber-dim);font-size:10px;flex-shrink:0;">[ DEFAULT ]</span>
+      </div>
+    `).join('');
+    return;
+  }
+
+  el.innerHTML='<div class="sys-line">// no signals yet</div>';
+}
 async function publishPost(){const title=document.getElementById('a-title').value.trim(),bodyEl=document.getElementById('a-body'),body=bodyEl.innerHTML.trim(),msg=document.getElementById('posts-msg');if(!title||!body||body==='<p><br></p>'){msg.textContent='// ERROR: title and body required';sndKey();return;}msg.textContent='// publishing...';const r=await fetch(`${SUPA_URL}/rest/v1/posts`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({title,tag:document.getElementById('a-tag').value,date:document.getElementById('a-date').value,excerpt:document.getElementById('a-excerpt').value.trim(),body})});if(r.ok||r.status===201){msg.textContent='// PUBLISHED OK';sndSignal();document.getElementById('a-title').value='';document.getElementById('a-excerpt').value='';bodyEl.innerHTML='';await loadAdminPostList();const posts=await getPosts();window._posts=posts;renderHomePosts();if(document.getElementById('sec-logs').classList.contains('visible'))loadBlogPosts();}else{msg.textContent='// ERROR: '+r.status;sndKey();}}
 async function deletePost(id){if(!confirm('Delete this post?'))return;const r=await fetch(`${SUPA_URL}/rest/v1/posts?id=eq.${id}`,{method:'DELETE',headers:H});if(r.ok||r.status===204){await loadAdminPostList();const posts=await getPosts();window._posts=posts;renderHomePosts();if(document.getElementById('sec-logs').classList.contains('visible'))loadBlogPosts();}}
 async function addSignal(stage){const input=document.getElementById(`s-new-${stage}`),msg=input.value.trim(),el=document.getElementById('signals-msg');if(!msg){el.textContent='// ERROR: message required';return;}el.textContent='// saving...';const r=await fetch(`${SUPA_URL}/rest/v1/signals`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({message:msg,stage})});if(r.ok||r.status===201){el.textContent='// ADDED OK';sndSignal();input.value='';await loadAdminSignalList(stage);const sigs=await getSignals();SIGNAL_MSGS.high=[];SIGNAL_MSGS.mid=[];SIGNAL_MSGS.low=[];sigs.forEach(s=>{const st=s.stage||'high';if(SIGNAL_MSGS[st])SIGNAL_MSGS[st].push(s.message);});}else{el.textContent='// ERROR: '+r.status;sndKey();}}
