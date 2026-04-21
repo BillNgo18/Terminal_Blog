@@ -415,13 +415,12 @@ function randFrom(arr){
 }
 
 function corruptionLevel(l){
-  if(l >= 70) return 0;
-  if(l >= 55) return 1;
-  if(l >= 40) return 2;
-  if(l >= 25) return 3;
-  if(l >= 10) return 4;
-  if(l > 0) return 5;
-  return 6;
+  if(l >= 40) return 0;
+  if(l >= 25) return 1;
+  if(l >= 15) return 2;
+  if(l >= 8) return 3;
+  if(l > 0) return 4;
+  return 5;
 }
 
 function markCount(level){
