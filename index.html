@@ -402,6 +402,181 @@ const H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'ap
 
 let lucidity=100,corruptionTriggered=false;
 
+const ORIGINAL_TEXT = new WeakMap();
+
+const ZALGO_UP = ['̍','̎','̄','̅','̿','̑','̆','̐','͒','͗','͑','̇','̈','̊','͂','̓','͊','͋','͌','̃','̂','̌','͐','̀','́','̋','̏','̒','̔','̽','̉','ͣ','ͤ','ͥ','ͦ','ͧ','ͨ','ͩ','ͪ','ͫ','ͬ','ͭ','ͮ','ͯ','̾','͛','͆','̚'];
+const ZALGO_MID = ['̕','̛','̀','́','͘','̡','̢','̧','̨','̴','̵','̶','͜','͝','͞','͟','͠','͢','̸','̷','͡'];
+const ZALGO_DOWN = ['̖','̗','̘','̙','̜','̝','̞','̟','̠','̤','̥','̦','̩','̪','̫','̬','̭','̮','̯','̰','̱','̲','̳','̹','̺','̻','̼','ͅ','͇','͈','͉','͍','͎','͓','͔','͕','͖','͙','͚'];
+
+let corruptionPulseStarted = false;
+
+function randFrom(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function corruptionLevel(l){
+  if(l >= 70) return 0;
+  if(l >= 55) return 1;
+  if(l >= 40) return 2;
+  if(l >= 25) return 3;
+  if(l >= 10) return 4;
+  if(l > 0) return 5;
+  return 6;
+}
+
+function getCurrentCorruptionColor(){
+  if(lucidity < 30) return '#ff2200';
+  if(lucidity < 70) return '#ff4400';
+  return getComputedStyle(document.documentElement).getPropertyValue('--amber').trim() || '#e8a020';
+}
+
+function markCount(level){
+  if(level <= 2) return 0;
+  if(level === 3) return 1;
+  if(level === 4) return 2;
+  if(level === 5) return 3;
+  return 4;
+}
+
+function corruptChar(ch, level){
+  if(/\s/.test(ch)) return ch;
+
+  const swaps = {
+    'A':'4','B':'8','E':'3','I':'1','O':'0','S':'5','T':'7',
+    'a':'4','b':'8','e':'3','i':'1','o':'0','s':'5','t':'7'
+  };
+
+  const glitchPool = ['#','%','&','@','/','\\','|','~','█','▓','▒'];
+
+  let out = ch;
+
+  if(level >= 1 && Math.random() < 0.03){
+    if(swaps[ch]) out = swaps[ch];
+  }
+
+  if(level >= 2 && Math.random() < 0.04){
+    if(Math.random() < 0.45) out = randFrom(glitchPool);
+  }
+
+  if(level >= 3){
+    const count = markCount(level);
+    for(let i = 0; i < count; i++){
+      if(Math.random() < 0.35) out += randFrom(ZALGO_UP);
+      if(Math.random() < 0.18) out += randFrom(ZALGO_MID);
+      if(Math.random() < 0.35) out += randFrom(ZALGO_DOWN);
+    }
+  }
+
+  if(level >= 6 && Math.random() < 0.10){
+    out = randFrom(['█','▓','▒','░','■','□']);
+  }
+
+  return out;
+}
+
+function corruptText(text, lucidityValue){
+  const level = corruptionLevel(lucidityValue);
+  if(level === 0) return text;
+
+  return Array.from(text).map(ch => corruptChar(ch, level)).join('');
+}
+
+function shouldSkipNode(node){
+  if(!node || !node.parentElement) return true;
+  if(!node.nodeValue || !node.nodeValue.trim()) return true;
+
+  const el = node.parentElement;
+
+  if(el.closest('#admin-overlay')) return true;
+  if(el.closest('#pwd-overlay')) return true;
+  if(el.closest('script')) return true;
+  if(el.closest('style')) return true;
+  if(el.closest('textarea')) return true;
+  if(el.closest('input')) return true;
+  if(el.closest('[contenteditable="true"]')) return true;
+  if(el.closest('#ticker-wrap')) return true;
+  if(el.closest('#boot')) return true;
+  if(el.closest('#reboot-overlay')) return true;
+  if(el.closest('#reboot-big-yes')) return true;
+  if(el.closest('#corruption-chars')) return true;
+  if(el.closest('#frantic-container')) return true;
+  if(el.closest('#signal-popup .popup-close')) return true;
+
+  return false;
+}
+
+function collectTextNodes(root){
+  const walker = document.createTreeWalker(
+    root,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node){
+        if(shouldSkipNode(node)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const nodes = [];
+  let current;
+  while((current = walker.nextNode())){
+    nodes.push(current);
+  }
+  return nodes;
+}
+
+function applyCorruptionToRoot(root=document.getElementById('screen')){
+  if(!root) return;
+
+  const color = getCurrentCorruptionColor();
+  const nodes = collectTextNodes(root);
+
+  nodes.forEach(node => {
+    if(!ORIGINAL_TEXT.has(node)){
+      ORIGINAL_TEXT.set(node, node.nodeValue);
+    }
+
+    const original = ORIGINAL_TEXT.get(node);
+    node.nodeValue = corruptText(original, lucidity);
+
+    if(node.parentElement){
+      node.parentElement.style.color = node.parentElement.dataset.baseColor || node.parentElement.style.color;
+      node.parentElement.style.textShadow = node.parentElement.dataset.baseShadow || node.parentElement.style.textShadow;
+
+      if(lucidity < 70){
+        if(!node.parentElement.dataset.baseColor){
+          node.parentElement.dataset.baseColor = node.parentElement.style.color || '';
+        }
+        if(!node.parentElement.dataset.baseShadow){
+          node.parentElement.dataset.baseShadow = node.parentElement.style.textShadow || '';
+        }
+        node.parentElement.style.color = color;
+      }
+    }
+  });
+}
+
+function refreshCorruptionRoots(){
+  applyCorruptionToRoot(document.getElementById('sec-home'));
+  applyCorruptionToRoot(document.getElementById('sec-logs'));
+  applyCorruptionToRoot(document.getElementById('sec-about'));
+  applyCorruptionToRoot(document.getElementById('sec-contact'));
+  applyCorruptionToRoot(document.getElementById('sec-monitor'));
+  applyCorruptionToRoot(document.getElementById('signal-popup'));
+  applyCorruptionToRoot(document.querySelector('.footer'));
+}
+
+function startCorruptionPulse(){
+  if(corruptionPulseStarted) return;
+  corruptionPulseStarted = true;
+
+  setInterval(()=>{
+    if(!corruptionTriggered){
+      refreshCorruptionRoots();
+    }
+  }, 1200);
+}
+  
 function stabilityLabel(l){if(l>=80)return'OPTIMAL';if(l>=60)return'STABLE';if(l>=40)return'NOMINAL';if(l>=20)return'DEGRADED';if(l>0)return'CRITICAL';return'FAILING';}
 function setLucidity(val){lucidity=Math.max(0,Math.min(100,val));updateHUD();applyLucidityEffects();if(lucidity<=0&&!corruptionTriggered){corruptionTriggered=true;triggerCorruptionCutscene();}}
 function drainLucidity(amt){setLucidity(lucidity-amt);}
@@ -414,8 +589,8 @@ function applyLucidityEffects(){
     if(lucidity<70){
       wl.textContent='SYSTEM: WELCOME BACK, ABUSER.';
       if(isLow){
-        wl.style.color='#ff0000';
-        wl.style.textShadow='0 0 8px #ff0000';
+        wl.style.color='#ff2200';
+        wl.style.textShadow='0 0 8px #ff2200';
       }else{
         wl.style.color='#ff4400';
         wl.style.textShadow='';
@@ -429,7 +604,7 @@ function applyLucidityEffects(){
 
   const pw=document.getElementById('person-word');
   if(pw&&!pw.dataset.scheduled){
-    if(isLow)pw.style.color='#ff0000';
+    if(isLow)pw.style.color='#ff2200';
     else if(isMid)pw.style.color='#ff4400';
     else pw.style.color='';
   }
@@ -455,6 +630,8 @@ function applyLucidityEffects(){
     if(rSub)rSub.style.color='';
     document.getElementById('fake-caret').classList.remove('red');
   }
+
+  refreshCorruptionRoots();
 }
 function startDecay(){setInterval(()=>{if(lucidity>0&&!corruptionTriggered)drainLucidity(1);},9000);}
 
@@ -727,7 +904,18 @@ function pickMsg(low,high,lastUsed){const l=lucidity;let pool;if(l>=85)pool=high
 
 const SIGNAL_MSGS=[];
 let lastSignalMsg=null,signalPopupTimer=null;
-function showSignalPopup(){if(!SIGNAL_MSGS.length)return;sndSignal();let msg;do{msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];}while(msg===lastSignalMsg&&SIGNAL_MSGS.length>1);lastSignalMsg=msg;document.getElementById('signal-popup-msg').textContent=msg;document.getElementById('signal-popup').classList.add('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);signalPopupTimer=setTimeout(closeSignalPopup,10000);}
+function showSignalPopup(){
+  if(!SIGNAL_MSGS.length)return;
+  sndSignal();
+  let msg;
+  do{msg=SIGNAL_MSGS[Math.floor(Math.random()*SIGNAL_MSGS.length)];}while(msg===lastSignalMsg&&SIGNAL_MSGS.length>1);
+  lastSignalMsg=msg;
+  document.getElementById('signal-popup-msg').textContent=msg;
+  document.getElementById('signal-popup').classList.add('visible');
+  refreshCorruptionRoots();
+  if(signalPopupTimer)clearTimeout(signalPopupTimer);
+  signalPopupTimer=setTimeout(closeSignalPopup,10000);
+}
 function closeSignalPopup(){sndNav();document.getElementById('signal-popup').classList.remove('visible');if(signalPopupTimer)clearTimeout(signalPopupTimer);drainLucidity(5);}
 function scheduleSignal(first=false){const delay=first?5000:300000+Math.random()*120000;setTimeout(()=>{showSignalPopup();scheduleSignal();},delay);}
 
@@ -800,11 +988,38 @@ async function getContent(){const r=await fetch(`${SUPA_URL}/rest/v1/content?sel
 async function getSignals(){const r=await fetch(`${SUPA_URL}/rest/v1/signals?order=created_at.asc`,{headers:H});return r.ok?await r.json():[];}
 async function upsertContent(key,value){return fetch(`${SUPA_URL}/rest/v1/content`,{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify({key,value,updated_at:new Date().toISOString()})});}
 function postEntryHTML(p,i){return`<div class="post-entry" onclick="openPost(${i})"><div class="post-meta"><span class="tag">${p.tag||'MISC'}</span> ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}</div><div class="post-title">${p.title}</div><div class="post-excerpt">${p.excerpt||''}</div><div class="read-more">&gt; READ MORE_</div></div>`;}
-function typeIntoElement(id,text){const el=document.getElementById(id);el.textContent='';let i=0;const iv=setInterval(()=>{el.textContent+=text[i];i++;if(i>=text.length)clearInterval(iv);},18);}
+function typeIntoElement(id,text){
+  const el=document.getElementById(id);
+  el.textContent='';
+  let i=0;
+  const iv=setInterval(()=>{
+    el.textContent+=text[i];
+    i++;
+    if(i>=text.length){
+      clearInterval(iv);
+      refreshCorruptionRoots();
+    }
+  },18);
+}
 function applyContent(rows){const m={};rows.forEach(r=>m[r.key]=r.value);if(m.home_blurb)typeIntoElement('home-blurb-text',m.home_blurb);if(m.about_bio)document.getElementById('about-bio-box').innerHTML=m.about_bio;if(m.about_interests)document.getElementById('about-interests-line').textContent=m.about_interests;if(m.about_location)document.getElementById('about-location-line').textContent=m.about_location;if(m.contact_ig||m.contact_github||m.contact_email||m.contact_linkedin){const box=document.getElementById('contact-box');let html='';if(m.contact_ig){const ig=m.contact_ig.replace('@','');html+=`<div class="contact-item"><span class="label">INSTAGRAM</span><span class="val"><a href="https://instagram.com/${ig}" style="color:var(--amber-bright);text-decoration:none;">@${ig}</a></span></div>`;}if(m.contact_github){html+=`<div class="contact-item"><span class="label">GITHUB</span><span class="val"><a href="https://github.com/${m.contact_github}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_github}</a></span></div>`;}if(m.contact_email){html+=`<div class="contact-item"><span class="label">EMAIL</span><span class="val"><a href="mailto:${m.contact_email}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_email}</a></span></div>`;}if(m.contact_linkedin){html+=`<div class="contact-item"><span class="label">LINKEDIN</span><span class="val"><a href="https://${m.contact_linkedin}" style="color:var(--amber-bright);text-decoration:none;">${m.contact_linkedin}</a></span></div>`;}if(box)box.innerHTML=html||box.innerHTML;}window._content=m;}
 function renderHomePosts(){const el=document.getElementById('home-posts');if(!window._posts||!window._posts.length){el.innerHTML='<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';return;}el.innerHTML=window._posts.slice(0,2).map((p,i)=>postEntryHTML(p,i)).join('');}
-async function loadBlogPosts(){const posts=await getPosts();window._posts=posts;document.getElementById('post-count').textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';const el=document.getElementById('posts-list');el.innerHTML=posts.length?posts.map((p,i)=>postEntryHTML(p,i)).join(''):'<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';}
-async function boot(){const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);window._posts=posts;applyContent(content);renderHomePosts();SIGNAL_MSGS.length=0;signals.forEach(s=>SIGNAL_MSGS.push(s.message));}
+async function loadBlogPosts(){
+  const posts=await getPosts();
+  window._posts=posts;
+  document.getElementById('post-count').textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';
+  const el=document.getElementById('posts-list');
+  el.innerHTML=posts.length?posts.map((p,i)=>postEntryHTML(p,i)).join(''):'<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';
+  refreshCorruptionRoots();
+}
+async function boot(){
+  const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);
+  window._posts=posts;
+  applyContent(content);
+  renderHomePosts();
+  SIGNAL_MSGS.length=0;
+  signals.forEach(s=>SIGNAL_MSGS.push(s.message));
+  refreshCorruptionRoots();
+}
 function showSection(id,el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
   const target=document.getElementById('sec-'+id);
@@ -814,7 +1029,22 @@ function showSection(id,el){
   closePost();
   if(id==='logs')loadBlogPosts();
 }
-function openPost(i){const p=(window._posts||[])[i];if(!p)return;sndNav();document.getElementById('pf-meta').textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;document.getElementById('pf-title').textContent=p.title;document.getElementById('pf-body').innerHTML=p.body||'';document.getElementById('posts-list').classList.add('hidden');document.getElementById('post-full').classList.add('visible');if(!document.getElementById('sec-logs').classList.contains('visible')){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));document.getElementById('sec-logs').classList.add('visible');document.querySelectorAll('nav a').forEach((a,idx)=>a.classList.toggle('active',idx===1));}}
+function openPost(i){
+  const p=(window._posts||[])[i];
+  if(!p)return;
+  sndNav();
+  document.getElementById('pf-meta').textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;
+  document.getElementById('pf-title').textContent=p.title;
+  document.getElementById('pf-body').innerHTML=p.body||'';
+  document.getElementById('posts-list').classList.add('hidden');
+  document.getElementById('post-full').classList.add('visible');
+  if(!document.getElementById('sec-logs').classList.contains('visible')){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
+    document.getElementById('sec-logs').classList.add('visible');
+    document.querySelectorAll('nav a').forEach((a,idx)=>a.classList.toggle('active',idx===1));
+  }
+  refreshCorruptionRoots();
+}
 function closePost(){document.getElementById('post-full').classList.remove('visible');document.getElementById('posts-list').classList.remove('hidden');}
 function openAdminFlow(){sndNav();document.getElementById('pwd-input').value='';document.getElementById('pwd-error').textContent='';document.getElementById('pwd-overlay').classList.add('visible');setTimeout(()=>document.getElementById('pwd-input').focus(),100);}
 async function openAdminPanel(){document.getElementById('admin-overlay').classList.add('visible');['posts-msg','home-msg','about-msg','contact-msg','signals-msg'].forEach(id=>document.getElementById(id).textContent='');const now=new Date();const mm=String(now.getMonth()+1).padStart(2,'0');const dd=String(now.getDate()).padStart(2,'0');const yyyy=now.getFullYear();document.getElementById('a-date').value=`${mm}-${dd}-${yyyy}`;const c=window._content||{};document.getElementById('c-about_bio').innerHTML=c.about_bio||'<p><br></p>';document.getElementById('c-about_interests').value=c.about_interests||'';document.getElementById('c-about_location').value=c.about_location||'';document.getElementById('c-home_blurb').value=c.home_blurb||'';document.getElementById('c-contact_ig').value=(c.contact_ig||'the_other_billiam').replace('@','');document.getElementById('c-contact_github').value=c.contact_github||'';document.getElementById('c-contact_email').value=c.contact_email||'';document.getElementById('c-contact_linkedin').value=c.contact_linkedin||'';document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});await loadAdminPostList();}
@@ -864,6 +1094,8 @@ function unlockAudio(){
       window.scheduleAbuser(true);
       window.schedulePerson(true);
       window.scheduleBlurb(true);
+      startCorruptionPulse();
+      refreshCorruptionRoots();
     });
   },100);
 }
