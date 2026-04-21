@@ -409,9 +409,31 @@ function updateHUD(){const fill=document.getElementById('hud-bar-fill'),label=do
 function applyLucidityEffects(){
   const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;
   const wl=document.getElementById('welcome-line');
-  if(wl){if(isLow){wl.style.color='#ff0000';wl.style.textShadow='0 0 8px #ff0000';}else if(isMid){wl.style.color='#ff4400';wl.style.textShadow='';}else{wl.style.color='';wl.style.textShadow='';}}
+
+  if(wl){
+    if(lucidity<70){
+      wl.textContent='SYSTEM: WELCOME BACK, ABUSER.';
+      if(isLow){
+        wl.style.color='#ff0000';
+        wl.style.textShadow='0 0 8px #ff0000';
+      }else{
+        wl.style.color='#ff4400';
+        wl.style.textShadow='';
+      }
+    }else{
+      wl.textContent='SYSTEM: Welcome back, user.';
+      wl.style.color='';
+      wl.style.textShadow='';
+    }
+  }
+
   const pw=document.getElementById('person-word');
-  if(pw&&!pw.dataset.scheduled){if(isLow)pw.style.color='#ff0000';else if(isMid)pw.style.color='#ff4400';else pw.style.color='';}
+  if(pw&&!pw.dataset.scheduled){
+    if(isLow)pw.style.color='#ff0000';
+    else if(isMid)pw.style.color='#ff4400';
+    else pw.style.color='';
+  }
+
   if(isLow){
     document.documentElement.style.setProperty('--amber','#ff2200');
     document.documentElement.style.setProperty('--amber-dim','#aa1100');
@@ -729,7 +751,38 @@ function updateTicker(){const d=DEPTS[Math.floor(Math.random()*DEPTS.length)],t=
 
 function egoClick(){sndEgo();const m=document.getElementById('ego-msg');m.style.display='block';shake(0.5);setTimeout(()=>{m.style.display='none';},4000);}
 
-window.scheduleAbuser=function(first=false){const delay=first?5000+Math.random()*5000:120000+Math.random()*120000;setTimeout(()=>{const el=document.getElementById('welcome-line');if(el){const isMid=lucidity<70&&lucidity>=30,isLow=lucidity<30;const txt=isMid||isLow?'SYSTEM: WELCOME BACK, ABUSER.':'SYSTEM: Welcome back, abuser.';el.textContent=txt;if(isMid){el.style.color='#ff4400';el.style.textShadow='';}if(isLow){el.style.color='#ff0000';el.style.textShadow='0 0 8px #ff0000';}setTimeout(()=>{el.textContent='SYSTEM: Welcome back, user.';applyLucidityEffects();window.scheduleAbuser();},60000);}else window.scheduleAbuser();},delay);};
+window.scheduleAbuser=function(first=false){
+  const delay=first?5000+Math.random()*5000:120000+Math.random()*120000;
+
+  setTimeout(()=>{
+    const el=document.getElementById('welcome-line');
+    if(!el){
+      window.scheduleAbuser();
+      return;
+    }
+
+    if(lucidity<70){
+      applyLucidityEffects();
+      window.scheduleAbuser();
+      return;
+    }
+
+    el.textContent='SYSTEM: Welcome back, abuser.';
+    el.style.color='';
+    el.style.textShadow='';
+
+    setTimeout(()=>{
+      if(lucidity<70){
+        applyLucidityEffects();
+      }else{
+        el.textContent='SYSTEM: Welcome back, user.';
+        el.style.color='';
+        el.style.textShadow='';
+      }
+      window.scheduleAbuser();
+    },60000);
+  },delay);
+};
 window.schedulePerson=function(first=false){const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;setTimeout(()=>{const el=document.getElementById('person-word');if(!el){window.schedulePerson();return;}const isLow=lucidity<30,isMid=lucidity<70&&lucidity>=30;el.style.color=isLow?'#ff0000':isMid?'#ff4400':'var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';applyLucidityEffects();window.schedulePerson();},1200);},delay);};
 const ALT_BLURBS=[{text:"Need a smoke break?",dur:15000,speed:28},{text:"Still there?",dur:15000,speed:28},{text:"Did you miss me?",dur:15000,speed:28},{text:"BOO!",dur:15000,speed:28},{text:"You're out there while I'm stuck in here. No fair >:(",dur:15000,speed:28},{text:"Could really go for some butter chicken and garlic naan...",dur:15000,speed:28},{text:"HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE.",dur:30000,speed:28},{text:"Please don't leave me. It's cold when you're not here.",dur:15000,speed:28}];
 let blurbTyping=false;
