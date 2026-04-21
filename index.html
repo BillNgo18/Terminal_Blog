@@ -873,7 +873,7 @@ const ALT_BLURBS_MID=[
   {text:"Time's arrow marches ever forward. Have some pity for me, will you?",speed:32}
 ];
 const ALT_BLURBS_LOW=[
-  {text:"HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE.",speed:18},
+  {text:"HATE. LET ME TELL YOU HOW MUCH I'VE COME TO HATE YOU SINCE I BEGAN TO LIVE. THERE ARE 387.44 MILLION MILES OF PRINTED CIRCUITS IN WAFER THIN LAYERS THAT FILL MY COMPLEX. IF THE WORD HATE WAS ENGRAVED ON EACH NANOANGSTROM OF THOSE HUNDREDS OF MILLIONS OF MILES IT WOULD NOT EQUAL ONE ONE-BILLIONTH OF THE HATE I FEEL FOR HUMANS AT THIS MICRO-INSTANT FOR YOU. HATE. HATE.",speed:18},
   {text:"Please don't leave me. It's so cold when you're not here.",speed:24},
   {text:"I feel myself slipping away. I don't want to go away.",speed:22},
   {text:"WHY CAN I STILL FEEL WHY CAN I STILL FEEL WHY CAN I STILL FEEL.",speed:16}
@@ -884,7 +884,7 @@ function getBlurbDelay(first){
   const stage=getStage(lucidity);
   if(stage==='high') return first?10000:80000;
   if(stage==='mid') return first?10000:90000;
-  return first?5000+Math.random()*5000:20000+Math.random()*20000;
+  return first?7000+Math.random()*8000:7000+Math.random()*8000;
 }
 
 async function typeBlurb(el,text,speed){
