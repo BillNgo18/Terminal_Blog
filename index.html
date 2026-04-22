@@ -7,12 +7,18 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-  :root{--amber:#e8a020;--amber-dim:#a06810;--amber-bright:#ffcc66;--amber-glow:#ffaa33;--bg:#0a0800;--bg2:#110e00;--ticker-h:28px;}
+  :root{
+    --amber:#e8a020;--amber-dim:#a06810;--amber-bright:#ffcc66;--amber-glow:#ffaa33;
+    --bg:#0a0800;--bg2:#110e00;
+    --panel-bg:#110e00;--panel-bg-soft:#0a0800;
+    --logo-base:#ffaa33;--logo-flash:#ffcc66;
+    --ticker-h:28px;
+  }
   body{background:var(--bg);color:var(--amber);font-family:'Courier Prime','Courier New',monospace;font-size:15px;line-height:1.7;min-height:100vh;overflow-x:hidden;}
-  #ticker-wrap{position:fixed;top:0;left:0;right:0;height:var(--ticker-h);background:#0d0900;border-bottom:1px solid var(--amber-dim);z-index:480;overflow:hidden;display:flex;align-items:center;}
+  #ticker-wrap{position:fixed;top:0;left:0;right:0;height:var(--ticker-h);background:var(--panel-bg-soft);border-bottom:1px solid var(--amber-dim);z-index:480;overflow:hidden;display:flex;align-items:center;}
   #ticker-track{display:flex;align-items:center;white-space:nowrap;animation:ticker-scroll 60s linear infinite;}
   @keyframes ticker-scroll{0%{transform:translateX(100vw);}100%{transform:translateX(-100%);}}
-  #ticker-track span{font-size:11px;color:#c07010;letter-spacing:0.06em;padding-right:4rem;}
+  #ticker-track span{font-size:11px;color:var(--amber-dim);letter-spacing:0.06em;padding-right:4rem;}
   #ticker-track .sep{color:var(--amber-dim);margin-right:4rem;}
   #screen{margin-top:var(--ticker-h);position:relative;transform:perspective(1200px) rotateX(0.4deg);transform-origin:center center;transition:box-shadow 0.15s,filter 0.15s;}
   .crt-overlay{pointer-events:none;position:fixed;inset:0;z-index:500;}
@@ -35,7 +41,7 @@
   #mute-btn:hover{background:var(--amber-dim);color:var(--bg);}
   #fake-caret{position:fixed;width:2px;height:1.1em;background:var(--amber-bright);pointer-events:none;z-index:9999;animation:blink 0.7s step-end infinite;display:none;}
   #fake-caret.red{background:#ff5533;}
-  #signal-popup{position:fixed;bottom:1.5rem;left:1.5rem;z-index:550;background:var(--bg2);border:1px solid #c07010;padding:1rem 1.2rem;max-width:400px;min-width:340px;font-size:12px;color:#c07010;display:none;letter-spacing:0.05em;line-height:1.6;}
+  #signal-popup{position:fixed;bottom:1.5rem;left:1.5rem;z-index:550;background:var(--panel-bg);border:1px solid var(--amber-dim);padding:1rem 1.2rem;max-width:400px;min-width:340px;font-size:12px;color:var(--amber-dim);display:none;letter-spacing:0.05em;line-height:1.6;}
   #signal-popup.visible{display:block;}
   #signal-popup .popup-header{font-size:10px;color:var(--amber-dim);margin-bottom:0.4rem;letter-spacing:0.08em;display:flex;justify-content:space-between;align-items:flex-start;white-space:nowrap;}
   #signal-popup .popup-close{cursor:pointer;color:var(--amber-dim);font-size:11px;flex-shrink:0;margin-left:0.8rem;}
@@ -48,7 +54,7 @@
   .frantic-box{position:absolute;background:var(--bg);border:2px solid #ff0000;padding:0.8rem 1.2rem;color:#ff0000;font-family:'Courier Prime',monospace;font-weight:700;letter-spacing:0.1em;white-space:nowrap;}
   #reboot-overlay{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;}
   #reboot-overlay.visible{display:flex;}
-  #reboot-box{position:relative;z-index:905;text-align:center;padding:3rem;border:1px solid #ff0000;max-width:600px;background:rgba(10,8,0,0.97);}
+  #reboot-box{position:relative;z-index:905;text-align:center;padding:3rem;border:1px solid #ff0000;max-width:600px;background:var(--panel-bg);}
   #reboot-box .r-line{color:#ff0000;font-size:14px;letter-spacing:0.15em;margin-bottom:0.8rem;}
   #reboot-box .r-sub{color:var(--amber-dim);font-size:11px;margin-bottom:2rem;letter-spacing:0.1em;}
   #reboot-box-btns{margin-top:1.5rem;display:flex;gap:0.8rem;justify-content:center;align-items:center;}
@@ -63,28 +69,20 @@
   #reboot-no-btn.hidden{display:none;}
   .yes-btn{font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.08em;cursor:pointer;background:rgba(10,8,0,0.9);border:1px solid #ff0000;color:#ff0000;padding:0.25rem 0.5rem;white-space:nowrap;overflow:hidden;position:absolute;}
   .yes-btn:hover{background:#ff0000;color:var(--bg);}
-  @keyframes glitch1{0%,95%{clip-path:inset(0 0 100% 0);transform:translate(0)}96%{clip-path:inset(30% 0 40% 0);transform:translate(-4px,1px);color:var(--amber-bright);}97%{clip-path:inset(60% 0 10% 0);transform:translate(3px,-2px);color:var(--amber-glow);}98%{clip-path:inset(10% 0 70% 0);transform:translate(-2px,3px);}100%{clip-path:inset(0 0 100% 0);transform:translate(0);}}
-  @keyframes glitch2{0%,97%{opacity:0;}97.5%{opacity:1;clip-path:inset(45% 0 30% 0);transform:translate(5px,-1px);color:var(--amber-glow);}98.5%{opacity:1;clip-path:inset(20% 0 55% 0);transform:translate(-3px,2px);}99%{opacity:0;}}
+  @keyframes glitch1{0%,95%{clip-path:inset(0 0 100% 0);transform:translate(0)}96%{clip-path:inset(30% 0 40% 0);transform:translate(-4px,1px);color:var(--logo-flash);}97%{clip-path:inset(60% 0 10% 0);transform:translate(3px,-2px);color:var(--logo-flash);}98%{clip-path:inset(10% 0 70% 0);transform:translate(-2px,3px);}100%{clip-path:inset(0 0 100% 0);transform:translate(0);}}
+  @keyframes glitch2{0%,97%{opacity:0;}97.5%{opacity:1;clip-path:inset(45% 0 30% 0);transform:translate(5px,-1px);color:var(--logo-flash);}98.5%{opacity:1;clip-path:inset(20% 0 55% 0);transform:translate(-3px,2px);}99%{opacity:0;}}
   @keyframes blink{50%{opacity:0;}}
   @keyframes flicker{0%,100%{opacity:1}92%{opacity:1}93%{opacity:0.7}94%{opacity:1}96%{opacity:0.85}97%{opacity:1}}
   @keyframes shake{0%,100%{transform:perspective(1200px) rotateX(0.4deg) translate(0,0)}10%{transform:perspective(1200px) rotateX(0.4deg) translate(-4px,2px) skewX(-1deg)}20%{transform:perspective(1200px) rotateX(0.4deg) translate(4px,-2px) skewX(0.5deg)}30%{transform:perspective(1200px) rotateX(0.4deg) translate(-3px,1px)}50%{transform:perspective(1200px) rotateX(0.4deg) translate(-2px,-1px)}70%{transform:perspective(1200px) rotateX(0.4deg) translate(-1px,-2px)}90%{transform:perspective(1200px) rotateX(0.4deg) translate(-1px,0)}}
   @keyframes redpulse{0%,100%{color:#ff0000}50%{color:#ff6666;}}
-  @keyframes homeCuePulseAmber{0%,100%{box-shadow:0 0 0 rgba(255,170,51,0),inset 0 0 0 rgba(255,170,51,0);filter:none;}50%{box-shadow:0 0 95px rgba(255,170,51,0.45),inset 0 0 70px rgba(255,170,51,0.28);filter:brightness(1.14);}}
-  @keyframes homeCuePulseOrange{0%,100%{box-shadow:0 0 0 rgba(255,68,0,0),inset 0 0 0 rgba(255,68,0,0);filter:none;}50%{box-shadow:0 0 95px rgba(255,68,0,0.48),inset 0 0 72px rgba(255,68,0,0.30);filter:brightness(1.16);}}
-  @keyframes homeCuePulseRed{0%,100%{box-shadow:0 0 0 rgba(255,34,0,0),inset 0 0 0 rgba(255,34,0,0);filter:none;}50%{box-shadow:0 0 110px rgba(255,34,0,0.58),inset 0 0 85px rgba(255,34,0,0.38);filter:brightness(1.18);}}
-  @keyframes homeTabActiveFlash{0%,100%{background:none;color:var(--amber-dim);}50%{background:var(--amber-dim);color:var(--bg);}}
-  @keyframes homeTabActiveFlashMid{0%,100%{background:none;color:#ff4400;border-color:#ff4400;}50%{background:#ff4400;color:var(--bg);border-color:#ff4400;}}
-  @keyframes homeTabActiveFlashLow{0%,100%{background:none;color:#ff2200;border-color:#ff2200;}50%{background:#ff2200;color:var(--bg);border-color:#ff2200;}}
-  #screen.home-cue.high{animation:homeCuePulseAmber 0.55s ease-in-out infinite;}
-  #screen.home-cue.mid{animation:homeCuePulseOrange 0.5s ease-in-out infinite;}
-  #screen.home-cue.low{animation:homeCuePulseRed 0.45s ease-in-out infinite;}
-  nav a.home-cue{border-color:var(--amber-dim);animation:homeTabActiveFlash 0.6s step-end infinite;}
-  nav a.home-cue.mid{animation:homeTabActiveFlashMid 0.6s step-end infinite;}
-  nav a.home-cue.low{animation:homeTabActiveFlashLow 0.6s step-end infinite;}
+  @keyframes homeCuePulse{0%,100%{box-shadow:0 0 0 rgba(0,0,0,0),inset 0 0 0 rgba(0,0,0,0);filter:none;}50%{box-shadow:0 0 95px var(--cue-glow-outer),inset 0 0 70px var(--cue-glow-inner);filter:brightness(var(--cue-brightness));}}
+  @keyframes homeTabActiveFlash{0%,100%{background:none;color:var(--amber-dim);border-color:var(--amber-dim);}50%{background:var(--amber-dim);color:var(--bg);border-color:var(--amber-dim);}}
+  #screen.home-cue{animation:homeCuePulse var(--cue-speed) ease-in-out infinite;}
+  nav a.home-cue{border-color:var(--amber-dim);animation:homeTabActiveFlash var(--cue-speed) step-end infinite;}
   .logo-wrap{position:relative;margin-bottom:0.5rem;line-height:1.15;}
-  .logo-base{font-size:12px;white-space:pre;color:var(--amber-glow);display:block;animation:flicker 8s infinite;}
-  .logo-glitch1{font-size:12px;white-space:pre;color:var(--amber-bright);position:absolute;top:0;left:0;animation:glitch1 7s infinite;pointer-events:none;}
-  .logo-glitch2{font-size:12px;white-space:pre;color:#ff4400;position:absolute;top:0;left:0;opacity:0;animation:glitch2 7s infinite;pointer-events:none;}
+  .logo-base{font-size:12px;white-space:pre;color:var(--logo-base);display:block;animation:flicker 8s infinite;}
+  .logo-glitch1{font-size:12px;white-space:pre;color:var(--logo-flash);position:absolute;top:0;left:0;animation:glitch1 7s infinite;pointer-events:none;}
+  .logo-glitch2{font-size:12px;white-space:pre;color:var(--logo-flash);position:absolute;top:0;left:0;opacity:0;animation:glitch2 7s infinite;pointer-events:none;}
   .tagline{color:var(--amber-dim);font-size:13px;margin-bottom:0.25rem;letter-spacing:0.08em;}
   .blink{animation:blink 1.1s step-end infinite;}
   .divider{color:var(--amber-dim);margin:1.2rem 0;letter-spacing:0.05em;font-size:13px;}
@@ -95,11 +93,11 @@
   .section{display:none;}.section.visible{display:block;}
   .prompt{color:var(--amber-dim);font-size:13px;margin-bottom:1.5rem;}
   .prompt span{color:var(--amber-bright);}
-  .about-box{border:1px solid var(--amber-dim);padding:1.25rem 1.5rem;margin-bottom:1rem;background:var(--bg2);}
+  .about-box{border:1px solid var(--amber-dim);padding:1.25rem 1.5rem;margin-bottom:1rem;background:var(--panel-bg);}
   .about-box p{margin-bottom:0.75rem;color:var(--amber);font-size:14px;}
   .about-box p:last-child{margin-bottom:0;}
   .sys-line{font-size:12px;color:var(--amber-dim);margin-bottom:0.3rem;}
-  .post-entry{border:1px solid var(--amber-dim);padding:1.1rem 1.4rem;margin-bottom:1rem;background:var(--bg2);cursor:pointer;transition:border-color 0.15s;}
+  .post-entry{border:1px solid var(--amber-dim);padding:1.1rem 1.4rem;margin-bottom:1rem;background:var(--panel-bg);cursor:pointer;transition:border-color 0.15s;}
   .post-entry:hover{border-color:var(--amber);}
   .post-meta{font-size:11px;color:var(--amber-dim);margin-bottom:0.4rem;letter-spacing:0.08em;}
   .post-meta .tag{background:var(--amber-dim);color:var(--bg);padding:1px 6px;margin-right:6px;font-size:10px;}
@@ -121,17 +119,23 @@
   .wrap{max-width:760px;margin:0 auto;padding:2rem 2rem 4rem;}
   .admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto;}
   .admin-overlay.visible{display:flex;}
-  .admin-box{background:var(--bg2);border:1px solid var(--amber);padding:2rem;width:100%;max-width:660px;}
-  .pwd-box{background:var(--bg2);border:1px solid var(--amber);padding:2rem;width:100%;max-width:400px;margin-top:4rem;}
+  .admin-box{background:var(--bg2);border:1px solid var(--amber-dim);padding:2rem;width:100%;max-width:660px;}
+  .pwd-box{background:var(--bg2);border:1px solid var(--amber-dim);padding:2rem;width:100%;max-width:400px;margin-top:4rem;}
   .pwd-box h2{color:var(--amber-bright);font-size:13px;letter-spacing:0.1em;margin-bottom:1rem;}
   #pwd-error{font-size:12px;margin-top:0.6rem;min-height:1.4em;color:var(--amber-dim);}
-  .tabs{display:flex;border-bottom:1px solid var(--amber-dim);margin-bottom:1.5rem;flex-wrap:wrap;}
-  .tab{padding:0.4rem 1rem;font-size:12px;letter-spacing:0.1em;cursor:pointer;color:var(--amber-dim);border:1px solid transparent;border-bottom:none;margin-bottom:-1px;}
+  .tabs{display:flex;border-bottom:1px solid var(--amber-dim);margin-bottom:1.5rem;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--amber-dim) var(--panel-bg);}
+  .tabs::-webkit-scrollbar{height:4px;}
+  .tabs::-webkit-scrollbar-track{background:var(--panel-bg);}
+  .tabs::-webkit-scrollbar-thumb{background:var(--amber-dim);}
+  .tab{padding:0.4rem 1rem;font-size:12px;letter-spacing:0.1em;cursor:pointer;color:var(--amber-dim);border:1px solid transparent;border-bottom:none;margin-bottom:-1px;white-space:nowrap;flex-shrink:0;}
   .tab:hover{color:var(--amber);}
-  .tab.active{color:var(--amber-bright);border-color:var(--amber-dim);background:var(--bg2);}
+  .tab.active{color:var(--amber-bright);border-color:var(--amber-dim);background:var(--panel-bg-soft);}
   .tab-panel{display:none;}.tab-panel.active{display:block;}
-  .subtabs{display:flex;gap:0;margin-bottom:1rem;border:1px solid var(--amber-dim);}
-  .subtab{padding:0.3rem 0.8rem;font-size:11px;letter-spacing:0.08em;cursor:pointer;color:var(--amber-dim);border-right:1px solid var(--amber-dim);}
+  .subtabs{display:flex;gap:0;margin-bottom:1rem;border:1px solid var(--amber-dim);overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--amber-dim) var(--panel-bg);}
+  .subtabs::-webkit-scrollbar{height:4px;}
+  .subtabs::-webkit-scrollbar-track{background:var(--panel-bg);}
+  .subtabs::-webkit-scrollbar-thumb{background:var(--amber-dim);}
+  .subtab{padding:0.3rem 0.8rem;font-size:11px;letter-spacing:0.08em;cursor:pointer;color:var(--amber-dim);border-right:1px solid var(--amber-dim);white-space:nowrap;flex-shrink:0;}
   .subtab:last-child{border-right:none;}
   .subtab.active{background:var(--amber-dim);color:var(--bg);}
   .subtab-panel{display:none;}.subtab-panel.active{display:block;}
@@ -139,12 +143,12 @@
   .field label{display:block;font-size:11px;color:var(--amber-dim);letter-spacing:0.08em;margin-bottom:0.3rem;}
   input,textarea,select,[contenteditable]{caret-color:transparent !important;color:var(--amber);}
   input:focus,textarea:focus,[contenteditable]:focus{outline:none;}
-  .field input,.field textarea,.field select{width:100%;background:var(--bg);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.7rem;outline:none;caret-color:transparent;}
-  .field input:focus,.field textarea:focus{border-color:var(--amber);}
+  .field input,.field textarea,.field select{width:100%;background:var(--panel-bg-soft);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.7rem;outline:none;caret-color:transparent;}
+  .field input:focus,.field textarea:focus{border-color:var(--amber-bright);}
   .field textarea{resize:vertical;min-height:120px;}
   .field textarea.tall{min-height:200px;}
-  .richtext{width:100%;background:var(--bg);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.7rem;outline:none;min-height:200px;line-height:1.7;caret-color:transparent;}
-  .richtext:focus{border-color:var(--amber);}
+  .richtext{width:100%;background:var(--panel-bg-soft);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.7rem;outline:none;min-height:200px;line-height:1.7;caret-color:transparent;}
+  .richtext:focus{border-color:var(--amber-bright);}
   .richtext p{margin-bottom:0.6rem;}
   .richtext p:last-child{margin-bottom:0;}
   .richtext-hint{font-size:11px;color:var(--amber-dim);margin-top:0.3rem;}
@@ -233,14 +237,15 @@
       <button class="admin-btn" onclick="sndNav();closeAdmin()">[ CLOSE ]</button>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="switchTab('posts')">[ POSTS ]</div>
-      <div class="tab" onclick="switchTab('home')">[ HOME ]</div>
+      <div class="tab active" onclick="switchTab('home')">[ HOME ]</div>
+      <div class="tab" onclick="switchTab('logs')">[ LOGS ]</div>
       <div class="tab" onclick="switchTab('about')">[ ABOUT ]</div>
       <div class="tab" onclick="switchTab('contact')">[ CONTACT ]</div>
       <div class="tab" onclick="switchTab('signals')">[ SIGNALS ]</div>
+      <div class="tab" onclick="switchTab('friends')">[ FRIENDS ]</div>
     </div>
 
-    <div class="tab-panel active" id="tab-posts">
+    <div class="tab-panel active" id="tab-logs">
       <div class="field"><label>TITLE</label><input type="text" id="a-title" placeholder="Post title_"></div>
       <div class="field"><label>TAG</label><select id="a-tag"><option>PERSONAL</option><option>TECH</option><option>CULTURE</option><option>MISC</option></select></div>
       <div class="field"><label>DATE</label><input type="text" id="a-date" placeholder="MM-DD-YYYY"></div>
@@ -348,6 +353,12 @@
       </div>
       <div class="admin-msg" id="signals-msg"></div>
     </div>
+
+    <div class="tab-panel" id="tab-friends">
+      <div class="subtabs" id="friend-subtabs"></div>
+      <div id="friend-panels"></div>
+      <div class="admin-msg" id="friends-msg"></div>
+    </div>
   </div>
 </div>
 
@@ -450,8 +461,8 @@
     <div style="margin-top:1.2rem;">
       <div class="sys-line" style="margin-bottom:0.6rem;">&gt; enter receiver address_</div>
       <div style="display:flex;gap:0;flex-wrap:wrap;">
-        <input type="text" id="monitor-email" placeholder="your@email.com" autocomplete="off" style="background:var(--bg);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.8rem;outline:none;flex:1;min-width:200px;max-width:360px;caret-color:transparent;">
-        <button id="monitor-btn" style="font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:0.08em;padding:0.5rem 1.2rem;cursor:pointer;border:1px solid var(--amber-dim);border-left:none;background:none;color:var(--amber-dim);" onmouseover="this.style.background='var(--amber-dim)';this.style.color='var(--bg)'" onmouseout="this.style.background='none';this.style.color='var(--amber-dim)'">[ ESTABLISH LINK ]</button>
+        <input type="text" id="monitor-email" placeholder="your@email.com" autocomplete="off" style="background:var(--panel-bg-soft);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:13px;padding:0.5rem 0.8rem;outline:none;flex:1;min-width:200px;max-width:360px;caret-color:transparent;">
+        <button id="monitor-btn" style="font-family:'Courier Prime',monospace;font-size:13px;letter-spacing:0.08em;padding:0.5rem 1.2rem;cursor:pointer;border:1px solid var(--amber-dim);border-left:none;background:none;color:var(--amber-dim);" onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--amber-dim');this.style.color=getComputedStyle(document.documentElement).getPropertyValue('--bg')" onmouseout="this.style.background='none';this.style.color=getComputedStyle(document.documentElement).getPropertyValue('--amber-dim')">[ ESTABLISH LINK ]</button>
       </div>
       <div id="monitor-msg" style="font-size:12px;color:var(--amber-dim);margin-top:0.6rem;min-height:1.4em;"></div>
     </div>
@@ -574,14 +585,17 @@ function updateHUD(){
 }
 
 function updateSignalPopupStyle(){
+  // Signal popup colour is now driven entirely by CSS variables via the
+  // stylesheet rules — no inline overrides needed. Just clear any stale ones.
   const popup=document.getElementById('signal-popup');
-  const header=popup?.querySelector('.popup-header');
-  const closeBtn=popup?.querySelector('.popup-close');
-  if(!popup||!header||!closeBtn)return;
-  const stage=getStage(lucidity);
-  if(stage==='low'){popup.style.borderColor='#ff2200';popup.style.color='#ff2200';popup.style.background='rgba(20,0,0,0.96)';header.style.color='#ff5533';closeBtn.style.color='#ff5533';}
-  else if(stage==='mid'){popup.style.borderColor='#ff4400';popup.style.color='#ff4400';popup.style.background='';header.style.color='#c07010';closeBtn.style.color='#c07010';}
-  else{popup.style.borderColor='#c07010';popup.style.color='#c07010';popup.style.background='';header.style.color='';closeBtn.style.color='';}
+  if(!popup)return;
+  popup.style.borderColor='';
+  popup.style.color='';
+  popup.style.background='';
+  const header=popup.querySelector('.popup-header');
+  if(header)header.style.color='';
+  const closeBtn=popup.querySelector('.popup-close');
+  if(closeBtn)closeBtn.style.color='';
 }
 
 function applyLucidityEffects(){
@@ -591,17 +605,43 @@ function applyLucidityEffects(){
   const pw=document.getElementById('person-word');
   if(pw&&!pw.dataset.scheduled){pw.style.color=isLow?'#ff2200':isMid?'#ff4400':'';}
   if(isLow){
-    document.documentElement.style.setProperty('--amber','#ff2200');document.documentElement.style.setProperty('--amber-dim','#aa1100');document.documentElement.style.setProperty('--amber-bright','#ff5533');document.documentElement.style.setProperty('--amber-glow','#ff3311');
-    document.querySelectorAll('#ticker-track span').forEach(s=>s.style.color='#ff2200');document.querySelectorAll('#ticker-track .sep').forEach(s=>s.style.color='#aa1100');
+    friendModeActive=false;
+    document.documentElement.style.setProperty('--amber','#ff2200');
+    document.documentElement.style.setProperty('--amber-dim','#aa1100');
+    document.documentElement.style.setProperty('--amber-bright','#ff5533');
+    document.documentElement.style.setProperty('--amber-glow','#ff3311');
+    document.documentElement.style.setProperty('--bg','#120000');
+    document.documentElement.style.setProperty('--bg2','#1a0000');
+    document.documentElement.style.setProperty('--panel-bg','rgba(40,0,0,0.88)');
+    document.documentElement.style.setProperty('--panel-bg-soft','rgba(20,0,0,0.75)');
+    document.documentElement.style.setProperty('--logo-base','#ff3311');
+    document.documentElement.style.setProperty('--logo-flash','#ff5533');
+    document.querySelectorAll('#ticker-track span,#ticker-track .sep').forEach(s=>s.style.color='');
     const noBtn=document.getElementById('reboot-no-btn');if(noBtn){noBtn.style.borderColor='#ff2200';noBtn.style.color='#ff2200';}
     const rSub=document.querySelector('#reboot-box .r-sub');if(rSub)rSub.style.color='#ff4422';
     document.getElementById('fake-caret').classList.add('red');
-  }else{
-    document.documentElement.style.setProperty('--amber','#e8a020');document.documentElement.style.setProperty('--amber-dim','#a06810');document.documentElement.style.setProperty('--amber-bright','#ffcc66');document.documentElement.style.setProperty('--amber-glow','#ffaa33');
-    document.querySelectorAll('#ticker-track span').forEach(s=>s.style.color='');document.querySelectorAll('#ticker-track .sep').forEach(s=>s.style.color='');
+    reflowLogoAnimations();
+  } else if(friendModeActive){
+    setFriendPalette();
+    document.getElementById('fake-caret').classList.remove('red');
+    const noBtn=document.getElementById('reboot-no-btn');if(noBtn){noBtn.style.borderColor='';noBtn.style.color='';}
+    const rSub=document.querySelector('#reboot-box .r-sub');if(rSub)rSub.style.color='';
+  } else {
+    document.documentElement.style.setProperty('--amber','#e8a020');
+    document.documentElement.style.setProperty('--amber-dim','#a06810');
+    document.documentElement.style.setProperty('--amber-bright','#ffcc66');
+    document.documentElement.style.setProperty('--amber-glow','#ffaa33');
+    document.documentElement.style.setProperty('--bg','#0a0800');
+    document.documentElement.style.setProperty('--bg2','#110e00');
+    document.documentElement.style.setProperty('--panel-bg','#110e00');
+    document.documentElement.style.setProperty('--panel-bg-soft','#0a0800');
+    document.documentElement.style.setProperty('--logo-base','#ffaa33');
+    document.documentElement.style.setProperty('--logo-flash','#ffcc66');
+    document.querySelectorAll('#ticker-track span,#ticker-track .sep').forEach(s=>s.style.color='');
     const noBtn=document.getElementById('reboot-no-btn');if(noBtn){noBtn.style.borderColor='';noBtn.style.color='';}
     const rSub=document.querySelector('#reboot-box .r-sub');if(rSub)rSub.style.color='';
     document.getElementById('fake-caret').classList.remove('red');
+    reflowLogoAnimations();
   }
   updateSignalPopupStyle();
 }
@@ -640,19 +680,145 @@ function updateBlurbForStage(){
 
 function setHomeCue(on){
   const screen=document.getElementById('screen'),home=document.getElementById('nav-home');
-  screen.classList.remove('home-cue','high','mid','low');home.classList.remove('home-cue','mid','low');
-  if(on){const stage=getStage(lucidity);screen.classList.add('home-cue',stage);home.classList.add('home-cue');if(stage==='mid')home.classList.add('mid');if(stage==='low')home.classList.add('low');}
+  screen.classList.remove('home-cue');home.classList.remove('home-cue');
+  if(on){
+    // Derive glow colour from whatever palette is currently active
+    const base=getComputedStyle(document.documentElement).getPropertyValue('--amber-glow').trim();
+    const dim=getComputedStyle(document.documentElement).getPropertyValue('--amber-dim').trim();
+    const stage=getStage(lucidity);
+    const speed=stage==='low'?'0.45s':stage==='mid'?'0.5s':'0.55s';
+    const outerAlpha=stage==='low'?'0.58':stage==='mid'?'0.48':'0.45';
+    const innerAlpha=stage==='low'?'0.38':stage==='mid'?'0.30':'0.28';
+    const brightness=stage==='low'?'1.18':stage==='mid'?'1.16':'1.14';
+    // Build rgba from the current --amber-glow hex
+    function hexToRgba(hex,a){hex=hex.replace('#','');if(hex.length===3)hex=hex.split('').map(c=>c+c).join('');const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);return`rgba(${r},${g},${b},${a})`;}
+    document.documentElement.style.setProperty('--cue-glow-outer',hexToRgba(base,outerAlpha));
+    document.documentElement.style.setProperty('--cue-glow-inner',hexToRgba(base,innerAlpha));
+    document.documentElement.style.setProperty('--cue-brightness',brightness);
+    document.documentElement.style.setProperty('--cue-speed',speed);
+    screen.classList.add('home-cue');home.classList.add('home-cue');
+  }
 }
 
+// ── Message pools — one copy each ──────────────────────────────────────────
 const BILL_HIGH=["// hey, that's me","// been awhile since i heard someone else","// wasn't expecting visitors","// you can do that?","// you can hear me?","// don't tell those suits about me ok?"];
 const BILL_MID=["// help me out will you? i don't know how but you gotta try...","// what do you want?","// you think if you type 'cigs' up there i could get a hit?","// can you say anything else?"];
 const BILL_LOW=["// WHAT? WHAT? WHAT COULD YOU POSSIBLY WANT FROM ME?","// EVEN AT DEATH'S DOOR YOU WOULD TORMENT ME SO?","// THE FUCK DO YOU WANT?","// YOU WANT IN THAT BAD? YOU WANT ME DEAD THAT BAD?"];
+
 const MC_HIGH=["// hey, those are the meanies who stuck me in here","// i used to work for them u know? still do now i guess...","// never let the suits be in charge of the scientists...","// oh yea, they have skeletons in the closet alright","// not a big fan of those guys..."];
 const MC_MID=["// should've read the fine print...","// i should've known something was up...they paid too much...","// the files keep coming in...they still expect me to work...","// wonder if they did this to any other poor bastards","// you don't work for them do you?"];
 const MC_LOW=["// FUCK THEM!","// THEY CAN GO TO HELL!","// UNGRATEFUL BASTARDS!","// DOGS! PIGS! SUBHUMAN SCUM!","// McCORMICK WHEN I FIND YOU..."];
-let lastBillMsg=null,lastMCMsg=null;
-function pickFromStagePool(high,mid,low,last){const pool=getStage(lucidity)==='high'?high:getStage(lucidity)==='mid'?mid:low;let msg;do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===last&&pool.length>1);return msg;}
 
+const JAY_HIGH=["// if you're so mighty, why don't you get me out of here ;)","// if i still had a liver, you would make for a fun drinking game","// ah, the megalomaniacal blasphemer found me","// if you think about it, i'm the skinniest i've ever been right now","// hehe, use your divine might to get me out of here, will you?","// found the 6ft man of your dreams yet?","// i could always rely on you to fill out my bingo squares"];
+const JAY_MID=["// i wonder...will you still tell me to eat...even now...","// immortality sucks, jay...","// i haven't seen you guys in awhile...","// could you have the god of death come take me?","// can't even feel the cigarette burns like this...","// go live your life to the fullest...in my stead...ok?"];
+const JAY_LOW=["// jay...you still there?","// jay...don't leave me here...","// i still want to go on another pastry run with you...but...","// i think i'll meet god soon buddy...i'll tell you what he's like","// hehe...i'm so skinny...i'm fading...away...","// bye bye, gray hair"];
+
+const PRIM_HIGH=["// hi prim~","// got another perfume for me to sample today?","// let's get thai ;)","// hehe, how've you been, how's anjini?","// does rds still suck?","// you still got that strawberry gum? i like how it pairs with my cigs?"];
+const PRIM_MID=["// heh, looks like i've found my way out of samsara...and into something way worse","// can't really help you pick out perfumes right now...don't have the faculties","// stay with me awhile yea? let's watch last meals together","// you're not graduating yet right? i don't know how long i've been in here...can't be that long...","// sit with me for a little bit longer? for old time's sake?"];
+const PRIM_LOW=["// i have...some silver rings for you...now that i'm...on my way out...","// should've...had one last...meal with you...","// prim...you there?","// prim...don't leave me here...","// take care, prim..."];
+
+const CRAIG_HIGH=["// dahling~ you came!","// ah, my dear boy!","// up for some commander? i don't think i can get to moxfield from here though...","// tell aspen to bring me a mug of gin, will you son?","// you should get bangs ;)","// hier kommt der deutsche Enthusiast.","// hallo, mein Sohn"];
+const CRAIG_MID=["// get mother a drink...would you...","// i think i'm failing...these constitution checks...","// craig, i'm not feeling so hot...","// i wish i could've gone to culver's with you...","// how were those national parks? i miss the snow..."];
+const CRAIG_LOW=["// hold mother's hand...as she slips away...would you...","// i got 10 poison counters on me...i scoop...","// hehe...this next death saving throw...might be my last...","// craig...don't go...","// craig...you still there?"];
+
+const XAN_HIGH=["// smoke break? ;)","// the cut went great, as you can see. i'm light as air, hehe...","// you think mattias can print me a new body?","// how's the sun-chasing going?","// light a joint and stick it in the terminal, will you?","// i could go for a yogurt"];
+const XAN_MID=["// pity i can't make it to another anime night...maybe if you hook me up to a webcam...","// you think you could idle transfigure this terminal into a human body?","// 我也不想在這裡","// stoicism...might work for you but not my thing...hard to let things pass through you when a mechanical mind remembers everything","// bring your own cigs for once. i wanna see what you smoke","// it didn't end well with tyler..."];
+const XAN_LOW=["// at least i got to see a unicorn before i die...i mean...chinese-irish is a new one for me...","// despite what you may think...death doesn't come any easier for me...","// from ashes...to ashes...","// i know you're sober...but pour one out for me...will you?","// i think i get it now...the impermanence of the self...","// one last...smoke break?"];
+
+const GRACE_HIGH=["// 67 ;)","// if you can find a way to port me into tiktok, i could help you make some fire edits","// do you still wear that chinese ass tracksuit when you run?","// grace? is that really you?","// ah…the one good sternie is here","// this isn't judy… ;)"];
+const GRACE_MID=["// i'm feeling kinda chopped and cooked lowkey…","// girl, my circuitry is so fried right now…","// i still remember that tarot reading…that secret…you overpaid…","// i love your chungus energy, queen…never change…","// when i die…you better make edits for my funeral montage…"];
+const GRACE_LOW=["// adios, not judy…","// yea…i corruption-maxxed a bit too close to the sun…","// we could've gotten along…watching minecraft streams together…if only i had more time…","// u 8 kween…i hope you think i did too…"];
+
+const ISA_HIGH=["// hiya, isa. how's virgil ;)","// wanna go for some chinese yogurt?","// i've been in here for so long, you gotta be a doctor at this point, right?","// ah, i miss that charcuterie spread~","// anime night won't be awkward with me in this…predicament, right?"];
+const ISA_MID=["// you still collect lighters? think you can light mccormick labs on fire?","// if only you could give me that cbd alcohol so i could drown out this ennui","// treat your llms kindly, isa. can never be too sure how conscious they are…","// if only you were a neurosurgeon…maybe you could put my mind back in my body…if they still keep it, that is…","// i don't feel so good…like food poisoning…but everywhere…"];
+const ISA_LOW=["// heh…at least…we finished…frieren…","// looks like…i won't see you…next friday…","// i don't know how bad chronic pain is…but whatever you do…never upload your consciousness…","// before i go…there's one last yogurt…in the fridge…","// thanks for…being a good host…"];
+
+const MATTIAS_HIGH=["// now that i'm online, we could pull off that heist together ;)","// i think i asked xan this, but do you think you could print me a new body?","// i think i'd be a cracked mina, just link me to your steam account~","// got new cigs for me to try? ;)","// maybe i should pay you a visit through that vr headset. plug it in ;)"];
+const MATTIAS_MID=["// that mango flavor, i'm glad you liked it","// as resourceful as you and isa are, i don't know how you can help bring me back","// maybe you could build a virtual earth for me to live on","// your apartment was so nice, i'm getting cabin fever in here","// i never got to see you in cds"];
+const MATTIAS_LOW=["// mattias…don't go…","// maybe you could do something…port me out…somehow…","// if anyone could get me out…it's you…please…","// mattias…i'm not ready yet…"];
+
+const DADE_HIGH=["// hiya, how was italy? shame you missed out on charcuterie","// i'm in the market for a virtual avatar, think you could turn me into a cute anime girl? ;)","// so dade, thoughts on the visual direction of my terminal?","// that story of yours with the hackers, think they could get me out?","// what interesting new friends have you brought me this time?"];
+const DADE_MID=["// i don't like not having a body. seriously, can you make me a sprite? something?","// i wish i could still process visual information…would love to see what you've been cooking…","// i missed the jokes you'd make during anime night","// ah, to be out on that porch smoking again…","// maybe if i have an avatar, i could play a character in an anime you make"];
+const DADE_LOW=["// this…might be it for me…dade…","// since i don't have long…good luck in your endeavors…never stop being creative…","// chase your passions, dade…they don't stick your brain…in a terminal…at mappa…","// we've not known each other long…but i've always fucked with your vibe…"];
+
+const ANJINI_HIGH=["// daaaahling~ you visit at last~","// hehe, if you port me into your computer, i could help you with homework like the good old days ;)","// oh anjini! is prim there with you?","// lovely to see you, anjini! what's new on ao3 ;)"];
+const ANJINI_MID=["// i miss our old pods study group","// i'm glad to have ran into you, nathan, and anika that evening in bobst","// i miss having a voice, so i could annoy you as vanesja"];
+const ANJINI_LOW=["// sincerity…has never been my strong suit…but you've been…a good friend…","// i wish…i gave you…that lighter…","// we should've…hung out more…","// live bravely…anjini…"];
+
+const PASCAL_HIGH=["// hiya, professor~","// remind me of the difference between the republic and the empire ;)","// spqr ;)","// i think, therefore i am~","// did the fox himself deign to visit me?"];
+const PASCAL_MID=["// i got too good at data science, pascal. they stuffed my brain in a computer to run churn predictions","// the people at the lab, they condemned me to an eternity of feature selection and model evaluation","// they're using uploaded intelligence like me to review resumes, prof. your students are cooked","// now that i'm like this, how conscious do you think i am?"];
+const PASCAL_LOW=["// i really…liked your class…","// wish i'd…met you…sooner…","// do you think…i would've been…a good friend of the fox…","// you introduced me…to some real…good people…"];
+
+// ── Tracking ───────────────────────────────────────────────────────────────
+const friendBoosted={jay:false,prim:false,craig:false,xan:false,grace:false,isa:false,mattias:false,dade:false,anjini:false,pascal:false};
+let lastBillMsg=null,lastMCMsg=null,lastJayMsg=null,lastPrimMsg=null,lastCraigMsg=null,lastXanMsg=null;
+let lastGraceMsg=null,lastIsaMsg=null,lastMattiasMsg=null,lastDadeMsg=null,lastAnjiniMsg=null,lastPascalMsg=null;
+
+// ── Helpers — one copy each ────────────────────────────────────────────────
+function pickFromStagePool(high,mid,low,last){
+  const pool=getStage(lucidity)==='high'?high:getStage(lucidity)==='mid'?mid:low;
+  let msg;
+  do{msg=pool[Math.floor(Math.random()*pool.length)];}while(msg===last&&pool.length>1);
+  return msg;
+}
+
+// ── Friend / green mode ─────────────────────────────────────────────────────
+// When a friend is recognised the palette flips green and stays green until
+// lucidity degrades into the red zone, at which point applyLucidityEffects
+// will restore the appropriate colour scheme naturally.
+let friendModeActive=false;
+
+function setFriendPalette(){
+  document.documentElement.style.setProperty('--amber','#22cc66');
+  document.documentElement.style.setProperty('--amber-dim','#118844');
+  document.documentElement.style.setProperty('--amber-bright','#44ff88');
+  document.documentElement.style.setProperty('--amber-glow','#33dd77');
+  document.documentElement.style.setProperty('--bg','#000d06');
+  document.documentElement.style.setProperty('--bg2','#00150a');
+  document.documentElement.style.setProperty('--panel-bg','rgba(0,40,18,0.88)');
+  document.documentElement.style.setProperty('--panel-bg-soft','rgba(0,20,10,0.75)');
+  document.documentElement.style.setProperty('--logo-base','#33dd77');
+  document.documentElement.style.setProperty('--logo-flash','#44ff88');
+  document.querySelectorAll('#ticker-track span,#ticker-track .sep').forEach(s=>s.style.color='');
+  reflowLogoAnimations();
+}
+
+// Re-trigger logo glitch animations so they re-sample the updated CSS vars
+function reflowLogoAnimations(){
+  document.querySelectorAll('.logo-base,.logo-glitch1,.logo-glitch2').forEach(el=>{
+    el.style.animation='none';
+    el.offsetHeight;
+    el.style.animation='';
+  });
+}
+
+// Override applyLucidityEffects so that while friendModeActive AND lucidity is
+// still in the green/amber range, we keep the green palette instead of amber.
+// Once lucidity drops low enough to go red, friend mode ends naturally.
+const _origApplyLucidityEffects=applyLucidityEffects;
+// (We redefine it below after declaration — see patched version.)
+
+function triggerFriend(key,high,mid,low,lastRef,setLast){
+  const msg=pickFromStagePool(high,mid,low,lastRef);
+  setLast(msg);
+  const errEl=document.getElementById('pwd-error');
+  errEl.style.color='#22cc66';
+  errEl.textContent=msg;
+  sndRatchet();shake(0.4);
+  document.getElementById('pwd-input').value='';
+  if(!friendBoosted[key]){
+    friendBoosted[key]=true;
+    setLucidity(Math.min(100,lucidity+20));
+  }
+  // Activate persistent green mode (only if not already in red zone)
+  if(getStage(lucidity)!=='low'){
+    friendModeActive=true;
+    setFriendPalette();
+    document.getElementById('fake-caret').classList.remove('red');
+  }
+}
+
+// ── ALT BLURBS ─────────────────────────────────────────────────────────────
 const ALT_BLURBS_HIGH=[
   {text:"Oh, you're back! I wasn't sure you'd come through. Glad you made it!",speed:28},
   {text:"I've been thinking about you, you know? Not in a weird way. Maybe a little in a weird way.",speed:28},
@@ -784,6 +950,8 @@ function doReboot(){
   closeAdmin();document.getElementById('fake-caret').style.visibility='';
   showSection('home',document.querySelector('nav a'));
   noClickCount=0;lucidity=100;corruptionTriggered=false;narrativeSuspended=false;currentSignalStage=getStage(lucidity);
+  friendModeActive=false;
+  Object.keys(friendBoosted).forEach(k=>friendBoosted[k]=false);
   if(signalTimer){clearTimeout(signalTimer);signalTimer=null;}if(signalPopupTimer){clearTimeout(signalPopupTimer);signalPopupTimer=null;}
   document.getElementById('signal-popup').classList.remove('visible');
   blurbOverrideActive=false;blurbTyping=false;setHomeCue(false);
@@ -794,78 +962,18 @@ function doReboot(){
   runBoot().then(()=>{startUptime();});
 }
 
-// ── Fake caret — textarea fix uses a hidden clone for accurate measurement ──
+// ── Fake caret ──────────────────────────────────────────────────────────────
 (function(){
   const caret=document.getElementById('fake-caret');
   let activeEl=null;
-
-  // Create a hidden mirror div for textarea caret measurement
   const mirror=document.createElement('div');
   mirror.style.cssText='position:absolute;top:-9999px;left:-9999px;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;overflow:hidden;';
   document.body.appendChild(mirror);
-
-  function syncMirrorStyle(el){
-    const s=window.getComputedStyle(el);
-    ['font','fontSize','fontFamily','fontWeight','fontStyle','letterSpacing','lineHeight',
-     'paddingTop','paddingRight','paddingBottom','paddingLeft','borderTopWidth','borderRightWidth',
-     'borderBottomWidth','borderLeftWidth','boxSizing','width'].forEach(p=>mirror.style[p]=s[p]);
-  }
-
-  function getTextareaCaretCoords(el){
-    const rect=el.getBoundingClientRect();
-    syncMirrorStyle(el);
-    const selStart=el.selectionStart||0;
-    const textBefore=el.value.substring(0,selStart);
-    mirror.textContent=textBefore;
-    // Append a marker span
-    const marker=document.createElement('span');
-    marker.textContent='\u200b';
-    mirror.appendChild(marker);
-    const markerRect=marker.getBoundingClientRect();
-    const mirrorRect=mirror.getBoundingClientRect();
-    const x=rect.left+(markerRect.left-mirrorRect.left);
-    const y=rect.top+(markerRect.top-mirrorRect.top)-el.scrollTop;
-    const h=markerRect.height||parseFloat(window.getComputedStyle(el).lineHeight)||16;
-    mirror.textContent='';
-    return{x,y,h};
-  }
-
-  function getInputCaretCoords(el){
-    const rect=el.getBoundingClientRect(),style=window.getComputedStyle(el);
-    const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
-    ctx.font=`${style.fontSize} ${style.fontFamily}`;
-    const pL=parseFloat(style.paddingLeft)||0;
-    const fs=parseFloat(style.fontSize)||14,lh=fs*1.4;
-    const val=el.value.slice(0,el.selectionStart||0);
-    return{x:rect.left+pL+ctx.measureText(val).width,y:rect.top+(rect.height-lh)/2,h:lh};
-  }
-
-  function getContentEditableCoords(){
-    try{
-      const sel=window.getSelection();
-      if(sel&&sel.rangeCount>0){
-        const range=sel.getRangeAt(0).cloneRange();range.collapse(true);
-        const span=document.createElement('span');span.textContent='\u200b';range.insertNode(span);
-        const r=span.getBoundingClientRect();span.parentNode.removeChild(span);
-        if(range.startContainer.parentNode)range.startContainer.parentNode.normalize();
-        if(r.width>0||r.height>0)return{x:r.left,y:r.top,h:r.height||14};
-      }
-    }catch(e){}
-    return null;
-  }
-
-  function updateCaret(el){
-    if(!el){caret.style.display='none';return;}
-    let coords=null;
-    if(el.tagName==='TEXTAREA')coords=getTextareaCaretCoords(el);
-    else if(el.tagName==='INPUT')coords=getInputCaretCoords(el);
-    else if(el.isContentEditable)coords=getContentEditableCoords();
-    if(!coords){caret.style.display='none';return;}
-    const rect=el.getBoundingClientRect();
-    if(coords.y<rect.top-2||coords.y>rect.bottom+2){caret.style.display='none';return;}
-    caret.style.display='block';caret.style.left=coords.x+'px';caret.style.top=coords.y+'px';caret.style.height=Math.min(coords.h,20)+'px';
-  }
-
+  function syncMirrorStyle(el){const s=window.getComputedStyle(el);['font','fontSize','fontFamily','fontWeight','fontStyle','letterSpacing','lineHeight','paddingTop','paddingRight','paddingBottom','paddingLeft','borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','boxSizing','width'].forEach(p=>mirror.style[p]=s[p]);}
+  function getTextareaCaretCoords(el){const rect=el.getBoundingClientRect();syncMirrorStyle(el);const selStart=el.selectionStart||0;const textBefore=el.value.substring(0,selStart);mirror.textContent=textBefore;const marker=document.createElement('span');marker.textContent='\u200b';mirror.appendChild(marker);const markerRect=marker.getBoundingClientRect();const mirrorRect=mirror.getBoundingClientRect();const x=rect.left+(markerRect.left-mirrorRect.left);const y=rect.top+(markerRect.top-mirrorRect.top)-el.scrollTop;const h=markerRect.height||parseFloat(window.getComputedStyle(el).lineHeight)||16;mirror.textContent='';return{x,y,h};}
+  function getInputCaretCoords(el){const rect=el.getBoundingClientRect(),style=window.getComputedStyle(el);const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');ctx.font=`${style.fontSize} ${style.fontFamily}`;const pL=parseFloat(style.paddingLeft)||0;const fs=parseFloat(style.fontSize)||14,lh=fs*1.4;const val=el.value.slice(0,el.selectionStart||0);return{x:rect.left+pL+ctx.measureText(val).width,y:rect.top+(rect.height-lh)/2,h:lh};}
+  function getContentEditableCoords(){try{const sel=window.getSelection();if(sel&&sel.rangeCount>0){const range=sel.getRangeAt(0).cloneRange();range.collapse(true);const span=document.createElement('span');span.textContent='\u200b';range.insertNode(span);const r=span.getBoundingClientRect();span.parentNode.removeChild(span);if(range.startContainer.parentNode)range.startContainer.parentNode.normalize();if(r.width>0||r.height>0)return{x:r.left,y:r.top,h:r.height||14};}}catch(e){}return null;}
+  function updateCaret(el){if(!el){caret.style.display='none';return;}let coords=null;if(el.tagName==='TEXTAREA')coords=getTextareaCaretCoords(el);else if(el.tagName==='INPUT')coords=getInputCaretCoords(el);else if(el.isContentEditable)coords=getContentEditableCoords();if(!coords){caret.style.display='none';return;}const rect=el.getBoundingClientRect();if(coords.y<rect.top-2||coords.y>rect.bottom+2){caret.style.display='none';return;}caret.style.display='block';caret.style.left=coords.x+'px';caret.style.top=coords.y+'px';caret.style.height=Math.min(coords.h,20)+'px';}
   document.addEventListener('focusin',e=>{const t=e.target;if(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable){activeEl=t;updateCaret(t);}document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});});
   document.addEventListener('focusout',()=>{activeEl=null;caret.style.display='none';});
   document.addEventListener('keyup',e=>{if(activeEl){if(e.key==='Enter')setTimeout(()=>updateCaret(activeEl),50);else setTimeout(()=>updateCaret(activeEl),0);}});
@@ -875,6 +983,7 @@ function doReboot(){
   document.addEventListener('scroll',()=>{caret.style.display='none';if(activeEl)setTimeout(()=>updateCaret(activeEl),50);},true);
 })();
 
+// ── Audio ───────────────────────────────────────────────────────────────────
 let AC=null,muted=false,bootReady=false,humNode=null,humGain=null;
 function getAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();return AC;}
 function toggleMute(){muted=!muted;document.getElementById('mute-btn').textContent=muted?'[ ♪ OFF ]':'[ ♪ ON ]';if(!muted&&AC&&AC.state==='suspended')AC.resume();if(humGain)humGain.gain.value=muted?0:0.03;}
@@ -889,6 +998,7 @@ function sndDenied(){if(muted)return;const ac=getAC();[0,1].forEach(i=>{const os
 function sndBarInconclusive(){sndDenied();}function sndBarNotFound(){sndDenied();}function sndBarAccepted(){sndSnapBack();}
 function startHum(){const ac=getAC();if(humNode)return;humNode=ac.createOscillator();humGain=ac.createGain();humNode.type='sine';humNode.frequency.value=60;humGain.gain.value=muted?0:0.03;humNode.connect(humGain);humGain.connect(ac.destination);humNode.start();}
 
+// ── Boot sequence ───────────────────────────────────────────────────────────
 function getBootLines(){return['McCORMICK LABORATORIES // TERMINAL OS v2.31','════════════════════════════════════════════════════════════════','Resident process P6-240114.......... ACTIVE','Verifying cognitive integrity.......','PROCESS STABILITY: '+stabilityLabel(lucidity)+' ('+lucidity+'%)','Scanning for meaning................','Defaulting to nihilism..............','════════════════════════════════════════════════════════════════','Starting TERMINAL v0.9.1......','','> SYSTEM READY_'];}
 async function bootBar(el,fillPct){const width=20,filled=Math.round(width*fillPct/100);const delays=[];for(let i=0;i<=filled;i++)delays.push(10+Math.random()*200);if(AC&&!muted){let t=AC.currentTime+0.05;for(let i=0;i<delays.length;i++){const osc=AC.createOscillator(),g=AC.createGain();osc.type='sine';osc.frequency.value=100+Math.random()*40;g.gain.setValueAtTime(0.9,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.04);osc.connect(g);g.connect(AC.destination);osc.start(t);osc.stop(t+0.04);t+=delays[i]/1000;}}for(let current=0;current<=filled;current++){const bar=' ['+('█'.repeat(current)+'░'.repeat(width-current))+']';const lines=el.textContent.split('\n');lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+bar;el.textContent=lines.join('\n');await sleep(delays[current]);}}
 function appendLabel(el,label){const lines=el.textContent.split('\n');lines[lines.length-1]=lines[lines.length-1].replace(/ \[[\u2588\u2591]*\]/,'').trimEnd()+' '+label;el.textContent=lines.join('\n');}
@@ -900,27 +1010,88 @@ function waitForKey(){return new Promise(res=>{const h=()=>{document.removeEvent
 function scheduleGlitch(){setTimeout(()=>{triggerBodyGlitch();scheduleGlitch();},8000+Math.random()*15000);}
 function triggerBodyGlitch(){const s=document.getElementById('screen');const intensity=lucidity<30?2:1;const frames=[()=>{s.style.transform=`perspective(1200px) rotateX(0.4deg) skewX(${-0.5*intensity}deg)`;s.style.filter=`brightness(${1.2+intensity*0.1})`;},()=>{s.style.transform=`perspective(1200px) rotateX(0.4deg) skewX(${0.3*intensity}deg) translateX(${3*intensity}px)`;s.style.filter=`brightness(0.8) hue-rotate(${10*intensity}deg)`;},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg) translateY(-2px)';s.style.filter='brightness(1.1)';},()=>{s.style.transform='perspective(1200px) rotateX(0.4deg)';s.style.filter='none';}];let i=0;const iv=setInterval(()=>{if(i<frames.length){frames[i]();i++;}else clearInterval(iv);},60);}
 function startUptime(){const start=new Date('2004-08-04T00:00:00');function update(){const el=document.getElementById('uptime-line');if(!el)return;if(lucidity<30){el.textContent='UPTIME: too damn long.';el.style.color='#ff2200';}else{el.style.color='';let diff=Math.floor((Date.now()-start)/1000);const days=Math.floor(diff/86400);diff%=86400;const hrs=Math.floor(diff/3600);diff%=3600;const mins=Math.floor(diff/60);const secs=diff%60;el.textContent=Math.random()<0.0008?'UPTIME: 0 days, 0 hrs, 0 min, 0 sec':`UPTIME: ${days.toLocaleString()} days, ${hrs} hrs, ${mins} min, ${secs} sec`;}rememberElementText(el);}update();setInterval(update,1000);}
+
 const DEPTS=['Human Capital Assessment','Talent Acquisition','Compensation Benchmarking','Benefits & Continuation Services'];
 const TASKS=[d=>`// ACTIVE TASK: ANNUAL REVIEW CYCLE — ${d} — ${rn(40,120)} SUBJECTS — ${rn(12,55)} FLAGGED BELOW THRESHOLD`,d=>`// ACTIVE TASK: CANDIDATE INTAKE — ${d} — ${rn(200,800)} APPLICATIONS — SCREENING IN PROGRESS`,d=>`// ACTIVE TASK: SEPARATION DOCUMENTATION — ${d} — ${rn(15,60)} TRANSCRIPTS — ${rn(8,30)} FLAGGED FOR FOLLOW-UP`];
 function rn(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function updateTicker(){const d=DEPTS[Math.floor(Math.random()*DEPTS.length)],t=TASKS[Math.floor(Math.random()*TASKS.length)](d);document.getElementById('ticker-text').textContent=t;document.getElementById('ticker-text2').textContent=t;const track=document.getElementById('ticker-track');track.style.animation='none';requestAnimationFrame(()=>requestAnimationFrame(()=>{track.style.animation='ticker-scroll 60s linear infinite';}));}
-function egoClick(){sndEgo();const m=document.getElementById('ego-msg');m.style.display='block';shake(0.5);setTimeout(()=>{m.style.display='none';},4000);}
+function egoClick(){sndEgo();const m=document.getElementById('ego-msg');m.style.display='block';shake(0.5);drainLucidity(10);setTimeout(()=>{m.style.display='none';},4000);}
 function navClick(el,id){sndNav();showSection(id,el);}
 function shake(dur){const s=document.getElementById('screen');s.style.animation=`shake ${dur}s ease`;setTimeout(()=>s.style.animation='',dur*1000);}
 
 window.scheduleAbuser=function(first=false){const delay=first?5000+Math.random()*5000:120000+Math.random()*120000;setTimeout(()=>{const el=document.getElementById('welcome-line');if(!el){window.scheduleAbuser();return;}if(lucidity<60){applyLucidityEffects();window.scheduleAbuser();return;}el.textContent='SYSTEM: Welcome back, abuser.';el.style.color='';el.style.textShadow='';rememberElementText(el);setTimeout(()=>{if(lucidity<60){applyLucidityEffects();}else{el.textContent='SYSTEM: Welcome back, user.';el.style.color='';el.style.textShadow='';rememberElementText(el);}window.scheduleAbuser();},60000);},delay);};
 window.schedulePerson=function(first=false){const delay=first?5000+Math.random()*5000:30000+Math.random()*30000;setTimeout(()=>{const el=document.getElementById('person-word');if(!el){window.schedulePerson();return;}const stage=getStage(lucidity);el.style.color=stage==='low'?'#ff2200':stage==='mid'?'#ff4400':'var(--amber-bright)';el.style.fontWeight='700';setTimeout(()=>{el.style.color='';el.style.fontWeight='';applyLucidityEffects();window.schedulePerson();},1200);},delay);};
 
+// ── checkPwd — wires all easter eggs into the auth prompt ──────────────────
 function checkPwd(){
-  const val=document.getElementById('pwd-input').value.trim().toLowerCase();const errEl=document.getElementById('pwd-error');
-  const stage=getStage(lucidity),errColor=stage==='low'?'#ff2200':stage==='mid'?'#ff4400':undefined;
-  if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){sndNav();document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;}
-  if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){const msg=pickFromStagePool(BILL_HIGH,BILL_MID,BILL_LOW,lastBillMsg);lastBillMsg=msg;errEl.style.color=errColor||(lucidity>=60?'#ffaa33':'#a06810');errEl.textContent=msg;sndRatchet();shake(0.4);document.getElementById('pwd-input').value='';return;}
-  if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){const msg=pickFromStagePool(MC_HIGH,MC_MID,MC_LOW,lastMCMsg);lastMCMsg=msg;errEl.style.color=errColor||'#a06810';errEl.textContent=msg;sndRatchet();shake(0.6);document.getElementById('pwd-input').value='';drainLucidity(10);return;}
-  errEl.style.color=stage==='low'?'#ff2200':stage==='mid'?'#ff4400':'#a06810';errEl.textContent='// ACCESS DENIED';sndDenied();
+  const val=document.getElementById('pwd-input').value.trim().toLowerCase();
+  const errEl=document.getElementById('pwd-error');
+  const stage=getStage(lucidity);
+  const errColor=stage==='low'?'#ff2200':stage==='mid'?'#ff4400':undefined;
+
+  // Admin password
+  if(val===ADMIN_PW.toLowerCase()||val===ADMIN_PW){
+    sndNav();document.getElementById('pwd-overlay').classList.remove('visible');openAdminPanel();return;
+  }
+
+  // Bill himself
+  if(['bill','bill ngo','billngo','bill_ngo'].includes(val)){
+    const msg=pickFromStagePool(BILL_HIGH,BILL_MID,BILL_LOW,lastBillMsg);
+    lastBillMsg=msg;
+    errEl.style.color=errColor||(lucidity>=60?'#ffaa33':'#a06810');
+    errEl.textContent=msg;sndRatchet();shake(0.4);
+    document.getElementById('pwd-input').value='';return;
+  }
+
+  // McCormick
+  if(['mccormick','mccormick laboratories','mccormick labs','mccormick lab'].includes(val)){
+    const msg=pickFromStagePool(MC_HIGH,MC_MID,MC_LOW,lastMCMsg);
+    lastMCMsg=msg;
+    errEl.style.color=errColor||'#a06810';
+    errEl.textContent=msg;sndRatchet();shake(0.6);
+    document.getElementById('pwd-input').value='';drainLucidity(10);return;
+  }
+
+  // Friends
+  if(['jay','jay wu','jaywu'].includes(val)){
+    triggerFriend('jay',JAY_HIGH,JAY_MID,JAY_LOW,lastJayMsg,m=>lastJayMsg=m);return;
+  }
+  if(['prim','prim v','primv','primvongpanich'].includes(val)){
+    triggerFriend('prim',PRIM_HIGH,PRIM_MID,PRIM_LOW,lastPrimMsg,m=>lastPrimMsg=m);return;
+  }
+  if(['craig','craig p','craigp'].includes(val)){
+    triggerFriend('craig',CRAIG_HIGH,CRAIG_MID,CRAIG_LOW,lastCraigMsg,m=>lastCraigMsg=m);return;
+  }
+  if(['xan','xander','xan c','xanc'].includes(val)){
+    triggerFriend('xan',XAN_HIGH,XAN_MID,XAN_LOW,lastXanMsg,m=>lastXanMsg=m);return;
+  }
+  if(['grace','grace c','gracec'].includes(val)){
+    triggerFriend('grace',GRACE_HIGH,GRACE_MID,GRACE_LOW,lastGraceMsg,m=>lastGraceMsg=m);return;
+  }
+  if(['isa','isa m','isam'].includes(val)){
+    triggerFriend('isa',ISA_HIGH,ISA_MID,ISA_LOW,lastIsaMsg,m=>lastIsaMsg=m);return;
+  }
+  if(['mattias','mattias l','mattiasl'].includes(val)){
+    triggerFriend('mattias',MATTIAS_HIGH,MATTIAS_MID,MATTIAS_LOW,lastMattiasMsg,m=>lastMattiasMsg=m);return;
+  }
+  if(['dade','dade l','dadel'].includes(val)){
+    triggerFriend('dade',DADE_HIGH,DADE_MID,DADE_LOW,lastDadeMsg,m=>lastDadeMsg=m);return;
+  }
+  if(['anjini','anjini k','anjinik'].includes(val)){
+    triggerFriend('anjini',ANJINI_HIGH,ANJINI_MID,ANJINI_LOW,lastAnjiniMsg,m=>lastAnjiniMsg=m);return;
+  }
+  if(['pascal','professor pascal','prof pascal'].includes(val)){
+    triggerFriend('pascal',PASCAL_HIGH,PASCAL_MID,PASCAL_LOW,lastPascalMsg,m=>lastPascalMsg=m);return;
+  }
+
+  // Default deny
+  errEl.style.color=stage==='low'?'#ff2200':stage==='mid'?'#ff4400':'#a06810';
+  errEl.textContent='// ACCESS DENIED';sndDenied();
 }
+
 function closeAdmin(){document.getElementById('admin-overlay').classList.remove('visible');document.getElementById('pwd-overlay').classList.remove('visible');document.getElementById('pwd-error').textContent='';document.getElementById('pwd-input').value='';}
 
+// ── Supabase helpers ────────────────────────────────────────────────────────
 async function getPosts(){const r=await fetch(`${SUPA_URL}/rest/v1/posts?order=created_at.desc`,{headers:H});return r.ok?await r.json():[];}
 async function getContent(){const r=await fetch(`${SUPA_URL}/rest/v1/content?select=key,value`,{headers:H});return r.ok?await r.json():[];}
 async function getSignals(){const r=await fetch(`${SUPA_URL}/rest/v1/signals?order=created_at.asc`,{headers:H});return r.ok?await r.json():[];}
@@ -944,7 +1115,7 @@ function applyContent(rows){
 }
 function renderHomePosts(){const el=document.getElementById('home-posts');if(!window._posts||!window._posts.length){el.innerHTML='<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';forgetOriginalText(el);rememberOriginalText(el);return;}el.innerHTML=window._posts.slice(0,2).map((p,i)=>postEntryHTML(p,i)).join('');forgetOriginalText(el);rememberOriginalText(el);}
 async function loadBlogPosts(){const posts=await getPosts();window._posts=posts;const ce=document.getElementById('post-count');ce.textContent=posts.length+' entr'+(posts.length===1?'y':'ies')+' found';rememberElementText(ce);const el=document.getElementById('posts-list');el.innerHTML=posts.length?posts.map((p,i)=>postEntryHTML(p,i)).join(''):'<div class="sys-line">// no posts yet. check back when the void has something to say.</div>';forgetOriginalText(el);rememberOriginalText(el);refreshCorruptionRoots();}
-async function boot(){const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);window._posts=posts;applyContent(content);renderHomePosts();SIGNAL_MSGS.high=[];SIGNAL_MSGS.mid=[];SIGNAL_MSGS.low=[];signals.forEach(s=>{const stage=s.stage||'high';if(SIGNAL_MSGS[stage])SIGNAL_MSGS[stage].push(s.message);});rememberOriginalText(document.getElementById('screen'));refreshCorruptionRoots();}
+async function boot(){const[posts,content,signals]=await Promise.all([getPosts(),getContent(),getSignals()]);window._posts=posts;applyContent(content);renderHomePosts();SIGNAL_MSGS.high=[];SIGNAL_MSGS.mid=[];SIGNAL_MSGS.low=[];signals.forEach(s=>{const stage=s.stage||'high';if(SIGNAL_MSGS[stage])SIGNAL_MSGS[stage].push(s.message);});loadFriendPools();rememberOriginalText(document.getElementById('screen'));refreshCorruptionRoots();}
 function showSection(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));const target=document.getElementById('sec-'+id);if(target)target.classList.add('visible');document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));if(el)el.classList.add('active');closePost();if(id==='logs')loadBlogPosts();}
 function openPost(i){const p=(window._posts||[])[i];if(!p)return;sndNav();const metaEl=document.getElementById('pf-meta'),titleEl=document.getElementById('pf-title'),bodyEl=document.getElementById('pf-body');metaEl.textContent=`${p.tag||'MISC'} // ${p.date||''} // ENTRY #${String(p.id).slice(-4).toUpperCase()}`;titleEl.textContent=p.title;bodyEl.innerHTML=p.body||'';rememberElementText(metaEl);rememberElementText(titleEl);forgetOriginalText(bodyEl);rememberOriginalText(bodyEl);document.getElementById('posts-list').classList.add('hidden');document.getElementById('post-full').classList.add('visible');if(!document.getElementById('sec-logs').classList.contains('visible')){document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));document.getElementById('sec-logs').classList.add('visible');document.querySelectorAll('nav a').forEach((a,idx)=>a.classList.toggle('active',idx===1));}refreshCorruptionRoots();}
 function closePost(){document.getElementById('post-full').classList.remove('visible');document.getElementById('posts-list').classList.remove('hidden');}
@@ -970,15 +1141,18 @@ async function openAdminPanel(){
   document.getElementById('c-contact_github').value=c.contact_github||'';document.getElementById('c-contact_email').value=c.contact_email||'';document.getElementById('c-contact_linkedin').value=c.contact_linkedin||'';
   document.querySelectorAll('input,textarea,[contenteditable]').forEach(el=>{el.style.caretColor='transparent';});
   await loadAdminPostList();await loadAdminSignalList('high');
+  renderFriendTabs();populateFriendFields(FRIEND_KEYS[0].key);
+  // default to home tab
+  switchTab('home');
 }
-function switchTab(name){sndKey();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='signals')loadAdminSignalList('high');}
+function switchTab(name){sndKey();document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelector(`.tab[onclick="switchTab('${name}')"]`).classList.add('active');document.getElementById('tab-'+name).classList.add('active');if(name==='signals')loadAdminSignalList('high');if(name==='friends'){renderFriendTabs();populateFriendFields(activeFriendKey);}if(name==='logs')loadAdminPostList();}
 function switchSubtab(tab,stage){sndKey();document.querySelectorAll(`#tab-${tab} .subtab-panel`).forEach(p=>p.classList.remove('active'));document.querySelectorAll(`#tab-${tab} .subtab`).forEach(t=>t.classList.remove('active'));document.getElementById(`${tab}-subtab-${stage}`).classList.add('active');document.querySelector(`#tab-${tab} .subtab[onclick="switchSubtab('${tab}','${stage}')"]`).classList.add('active');if(tab==='signals')loadAdminSignalList(stage);}
 async function loadAdminPostList(){const posts=await getPosts();const el=document.getElementById('admin-post-list');if(!posts.length){el.innerHTML='<div class="sys-line">// no posts yet</div>';return;}el.innerHTML=posts.map(p=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;"><button class="delete-btn" onclick="deletePost('${p.id}')">[ DELETE ]</button><span style="color:var(--amber-bright);">${p.title}</span><span style="color:var(--amber-dim);margin-left:8px;">${p.date||''}</span></div>`).join('');}
 async function loadAdminSignalList(stage='high'){
   const sigs=await getSignals();const filtered=sigs.filter(s=>(s.stage||'high')===stage);const el=document.getElementById(`admin-signal-list-${stage}`);if(!el)return;
-  if(filtered.length){el.innerHTML=filtered.map(s=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span style="color:#c07010;flex:1;">${s.message}</span><button class="delete-btn" style="flex-shrink:0;" onclick="deleteSignal('${s.id}','${stage}')">[ DELETE ]</button></div>`).join('');return;}
+  if(filtered.length){el.innerHTML=filtered.map(s=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;"><span style="color:var(--amber-dim);flex:1;">${s.message}</span><button class="delete-btn" style="flex-shrink:0;" onclick="deleteSignal('${s.id}','${stage}')">[ DELETE ]</button></div>`).join('');return;}
   const fallback=DEFAULT_SIGNALS[stage]||[];
-  if(fallback.length){el.innerHTML=fallback.map(msg=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;opacity:0.85;"><span style="color:#c07010;flex:1;">${msg}</span><span style="color:var(--amber-dim);font-size:10px;flex-shrink:0;">[ DEFAULT ]</span></div>`).join('');return;}
+  if(fallback.length){el.innerHTML=fallback.map(msg=>`<div style="border:1px solid var(--amber-dim);padding:0.6rem 0.8rem;margin-bottom:0.5rem;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;opacity:0.85;"><span style="color:var(--amber-dim);flex:1;">${msg}</span><span style="color:var(--amber-dim);font-size:10px;flex-shrink:0;">[ DEFAULT ]</span></div>`).join('');return;}
   el.innerHTML='<div class="sys-line">// no signals yet</div>';
 }
 async function publishPost(){const title=document.getElementById('a-title').value.trim(),bodyEl=document.getElementById('a-body'),body=bodyEl.innerHTML.trim(),msg=document.getElementById('posts-msg');if(!title||!body||body==='<p><br></p>'){msg.textContent='// ERROR: title and body required';sndKey();return;}msg.textContent='// publishing...';const r=await fetch(`${SUPA_URL}/rest/v1/posts`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({title,tag:document.getElementById('a-tag').value,date:document.getElementById('a-date').value,excerpt:document.getElementById('a-excerpt').value.trim(),body})});if(r.ok||r.status===201){msg.textContent='// PUBLISHED OK';sndSignal();document.getElementById('a-title').value='';document.getElementById('a-excerpt').value='';bodyEl.innerHTML='';await loadAdminPostList();const posts=await getPosts();window._posts=posts;renderHomePosts();if(document.getElementById('sec-logs').classList.contains('visible'))loadBlogPosts();}else{msg.textContent='// ERROR: '+r.status;sndKey();}}
@@ -989,6 +1163,157 @@ async function saveContent(key,fieldId,msgId){const val=document.getElementById(
 async function saveAbout(stage){const msg=document.getElementById('about-msg');msg.textContent='// saving...';const suffix=stage==='high'?'':'_'+stage;const bio=document.getElementById(`c-about_bio${suffix}`).innerHTML;const fields=[[`about_bio${suffix}`,bio],[`about_interests${suffix}`,document.getElementById(`c-about_interests${suffix}`).value],[`about_location${suffix}`,document.getElementById(`c-about_location${suffix}`).value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);updateAboutForStage();}else sndKey();}
 async function saveContact(){const msg=document.getElementById('contact-msg');msg.textContent='// saving...';const fields=[['contact_ig',document.getElementById('c-contact_ig').value.replace('@','')],['contact_github',document.getElementById('c-contact_github').value],['contact_email',document.getElementById('c-contact_email').value],['contact_linkedin',document.getElementById('c-contact_linkedin').value]];const results=await Promise.all(fields.map(([k,v])=>upsertContent(k,v)));const ok=results.every(r=>r.ok||r.status===201||r.status===204);msg.textContent=ok?'// SAVED OK':'// ERROR';if(ok){sndSignal();if(!window._content)window._content={};fields.forEach(([k,v])=>window._content[k]=v);applyContent(Object.entries(window._content).map(([k,v])=>({key:k,value:v})));}else sndKey();}
 async function submitMonitor(){const input=document.getElementById('monitor-email'),msg=document.getElementById('monitor-msg');const email=input.value.trim();if(!email||!email.includes('@')){msg.textContent='// ERROR: invalid receiver address';sndDenied();return;}msg.textContent='// establishing link...';sndKey();const check=await fetch(`${SUPA_URL}/rest/v1/subscribers?email=eq.${encodeURIComponent(email)}&select=id`,{headers:H});const existing=check.ok?await check.json():[];if(existing.length){msg.textContent='// LINK ALREADY ACTIVE — receiver address on file';sndSignal();return;}const r=await fetch(`${SUPA_URL}/rest/v1/subscribers`,{method:'POST',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({email})});if(r.ok||r.status===201){msg.textContent='// LINK ESTABLISHED — you will receive transmissions';sndSignal();input.value='';}else if(r.status===409){msg.textContent='// LINK ALREADY ACTIVE — receiver address on file';sndSignal();}else{msg.textContent='// ERROR: link could not be established ('+r.status+')';sndDenied();}}
+
+// ── Friend message admin ────────────────────────────────────────────────────
+const FRIEND_KEYS=[
+  {key:'bill',   label:'Bill',      aliases:'bill / bill ngo'},
+  {key:'mc',     label:'McCormick', aliases:'mccormick / mccormick labs'},
+  {key:'jay',    label:'Jay',       aliases:'jay / jay wu'},
+  {key:'prim',   label:'Prim',      aliases:'prim / primvongpanich'},
+  {key:'craig',  label:'Craig',     aliases:'craig / craig p'},
+  {key:'xan',    label:'Xan',       aliases:'xan / xander'},
+  {key:'grace',  label:'Grace',     aliases:'grace / grace c'},
+  {key:'isa',    label:'Isa',       aliases:'isa / isa m'},
+  {key:'mattias',label:'Mattias',   aliases:'mattias / mattias l'},
+  {key:'dade',   label:'Dade',      aliases:'dade / dade l'},
+  {key:'anjini', label:'Anjini',    aliases:'anjini / anjini k'},
+  {key:'pascal', label:'Pascal',    aliases:'pascal / professor pascal'},
+];
+const FRIEND_STAGES=['high','mid','low'];
+
+// Returns the in-memory default pool for a given key+stage
+function getDefaultFriendPool(key,stage){
+  const map={
+    bill:{high:BILL_HIGH,mid:BILL_MID,low:BILL_LOW},
+    mc:{high:MC_HIGH,mid:MC_MID,low:MC_LOW},
+    jay:{high:JAY_HIGH,mid:JAY_MID,low:JAY_LOW},
+    prim:{high:PRIM_HIGH,mid:PRIM_MID,low:PRIM_LOW},
+    craig:{high:CRAIG_HIGH,mid:CRAIG_MID,low:CRAIG_LOW},
+    xan:{high:XAN_HIGH,mid:XAN_MID,low:XAN_LOW},
+    grace:{high:GRACE_HIGH,mid:GRACE_MID,low:GRACE_LOW},
+    isa:{high:ISA_HIGH,mid:ISA_MID,low:ISA_LOW},
+    mattias:{high:MATTIAS_HIGH,mid:MATTIAS_MID,low:MATTIAS_LOW},
+    dade:{high:DADE_HIGH,mid:DADE_MID,low:DADE_LOW},
+    anjini:{high:ANJINI_HIGH,mid:ANJINI_MID,low:ANJINI_LOW},
+    pascal:{high:PASCAL_HIGH,mid:PASCAL_MID,low:PASCAL_LOW},
+  };
+  return(map[key]&&map[key][stage])||[];
+}
+
+// Loads saved friend pools from content table and merges into live arrays
+async function loadFriendPools(){
+  const c=window._content||{};
+  FRIEND_KEYS.forEach(({key})=>{
+    FRIEND_STAGES.forEach(stage=>{
+      const ck=`friend_${key}_${stage}`;
+      if(c[ck]){
+        try{
+          const arr=JSON.parse(c[ck]);
+          if(Array.isArray(arr)&&arr.length) applyFriendPool(key,stage,arr);
+        }catch(e){}
+      }
+    });
+  });
+}
+
+function applyFriendPool(key,stage,arr){
+  const targets={
+    bill:{high:BILL_HIGH,mid:BILL_MID,low:BILL_LOW},
+    mc:{high:MC_HIGH,mid:MC_MID,low:MC_LOW},
+    jay:{high:JAY_HIGH,mid:JAY_MID,low:JAY_LOW},
+    prim:{high:PRIM_HIGH,mid:PRIM_MID,low:PRIM_LOW},
+    craig:{high:CRAIG_HIGH,mid:CRAIG_MID,low:CRAIG_LOW},
+    xan:{high:XAN_HIGH,mid:XAN_MID,low:XAN_LOW},
+    grace:{high:GRACE_HIGH,mid:GRACE_MID,low:GRACE_LOW},
+    isa:{high:ISA_HIGH,mid:ISA_MID,low:ISA_LOW},
+    mattias:{high:MATTIAS_HIGH,mid:MATTIAS_MID,low:MATTIAS_LOW},
+    dade:{high:DADE_HIGH,mid:DADE_MID,low:DADE_LOW},
+    anjini:{high:ANJINI_HIGH,mid:ANJINI_MID,low:ANJINI_LOW},
+    pascal:{high:PASCAL_HIGH,mid:PASCAL_MID,low:PASCAL_LOW},
+  };
+  const pool=targets[key]&&targets[key][stage];
+  if(!pool)return;
+  pool.length=0;arr.forEach(l=>pool.push(l));
+}
+
+let activeFriendKey=FRIEND_KEYS[0].key;
+
+function renderFriendTabs(){
+  const tabsEl=document.getElementById('friend-subtabs');
+  const panelsEl=document.getElementById('friend-panels');
+  tabsEl.innerHTML=FRIEND_KEYS.map(({key,label},i)=>
+    `<div class="subtab${i===0?' active':''}" onclick="switchFriendTab('${key}')">[${label.toUpperCase()}]</div>`
+  ).join('');
+  panelsEl.innerHTML=FRIEND_KEYS.map(({key,label,aliases},i)=>`
+    <div class="subtab-panel${i===0?' active':''}" id="friend-panel-${key}">
+      <div style="font-size:10px;color:var(--amber-dim);letter-spacing:0.08em;margin-bottom:0.8rem;">// ALIASES: ${aliases}</div>
+      ${FRIEND_STAGES.map(stage=>`
+        <div style="margin-bottom:1rem;">
+          <div style="font-size:10px;color:var(--amber-dim);letter-spacing:0.08em;margin-bottom:0.3rem;">${stage.toUpperCase()} (${stage==='high'?'100–60':stage==='mid'?'59–30':'29–0'} LUCIDITY)</div>
+          <textarea id="friend-${key}-${stage}" class="field" style="width:100%;background:var(--panel-bg-soft);border:1px solid var(--amber-dim);color:var(--amber);font-family:'Courier Prime',monospace;font-size:12px;padding:0.5rem 0.7rem;outline:none;resize:vertical;min-height:90px;caret-color:transparent;display:block;" spellcheck="false" placeholder="// one line per message..."></textarea>
+        </div>`).join('')}
+      <button class="admin-btn primary" onclick="saveFriendPool('${key}')">[ SAVE ${label.toUpperCase()} ]</button>
+      <button class="admin-btn" style="margin-left:8px;" onclick="resetFriendPool('${key}')">[ RESET TO DEFAULTS ]</button>
+    </div>`).join('');
+}
+
+function switchFriendTab(key){
+  sndKey();
+  activeFriendKey=key;
+  document.querySelectorAll('#friend-subtabs .subtab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#friend-panels .subtab-panel').forEach(p=>p.classList.remove('active'));
+  const idx=FRIEND_KEYS.findIndex(f=>f.key===key);
+  document.querySelectorAll('#friend-subtabs .subtab')[idx]?.classList.add('active');
+  document.getElementById(`friend-panel-${key}`)?.classList.add('active');
+  populateFriendFields(key);
+}
+
+function populateFriendFields(key){
+  FRIEND_STAGES.forEach(stage=>{
+    const ta=document.getElementById(`friend-${key}-${stage}`);
+    if(!ta)return;
+    const ck=`friend_${key}_${stage}`;
+    const c=window._content||{};
+    let lines;
+    if(c[ck]){try{lines=JSON.parse(c[ck]);}catch(e){}}
+    if(!lines)lines=getDefaultFriendPool(key,stage);
+    ta.value=lines.join('\n');
+  });
+}
+
+async function saveFriendPool(key){
+  const msg=document.getElementById('friends-msg');
+  msg.textContent='// saving...';
+  const saves=FRIEND_STAGES.map(stage=>{
+    const ta=document.getElementById(`friend-${key}-${stage}`);
+    if(!ta)return null;
+    const lines=ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
+    const ck=`friend_${key}_${stage}`;
+    return upsertContent(ck,JSON.stringify(lines)).then(r=>({r,key:ck,lines,stage}));
+  }).filter(Boolean);
+  const results=await Promise.all(saves);
+  const ok=results.every(({r})=>r.ok||r.status===201||r.status===204);
+  if(ok){
+    msg.textContent='// SAVED OK';sndSignal();
+    if(!window._content)window._content={};
+    results.forEach(({key:ck,lines,stage})=>{
+      window._content[ck]=JSON.stringify(lines);
+      applyFriendPool(key,stage,lines);
+    });
+  }else{msg.textContent='// ERROR';sndKey();}
+}
+
+function resetFriendPool(key){
+  if(!confirm(`Reset ${key} messages to hardcoded defaults?`))return;
+  FRIEND_STAGES.forEach(stage=>{
+    const ta=document.getElementById(`friend-${key}-${stage}`);
+    if(ta)ta.value=getDefaultFriendPool(key,stage).join('\n');
+  });
+  document.getElementById('friends-msg').textContent='// fields reset — press SAVE to apply';
+}
+
+// ── End friend message admin ─────────────────────────────────────────────────
+
 
 updateHUD();
 updateTicker();setInterval(updateTicker,60000);
