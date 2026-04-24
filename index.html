@@ -859,11 +859,13 @@ async function triggerCorruptionCutscene(){
 
 var noClickCount=0;
 function buildYesGrid(mode){
-  var zone=document.getElementById('reboot-yes-zone');zone.classList.add('active');zone.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:auto;';
+  var zone=document.getElementById('reboot-yes-zone');zone.classList.add('active');zone.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:921;';
+  var overlay=document.getElementById('reboot-overlay');
   var layer=document.createElement('div');
-  var layerZ=mode===1?928:921;
+  layer.className='reboot-yes-layer';
+  var layerZ=mode===1?929:921;
   layer.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:'+layerZ+';';
-  zone.appendChild(layer);
+  overlay.appendChild(layer);
   var btnW=90,btnH=32,gap=4;
   function addYesButton(x,y,idx,instant){var btn=document.createElement('button');btn.className='yes-btn';btn.textContent='[ YES ]';btn.onclick=doReboot;btn.style.cssText='left:'+x+'px;top:'+y+'px;width:'+btnW+'px;height:'+btnH+'px;opacity:'+(instant?'1':'0')+';transition:opacity 0.1s;pointer-events:all;';layer.appendChild(btn);if(!instant){setTimeout(function(){btn.style.opacity='1';if(idx%4===0)sndDenied();},idx*30);}return btn;}
   if(mode===1){var cols=5,rows=4,gridW=cols*(btnW+gap),gridH=rows*(btnH+gap);var startX=Math.max(0,(window.innerWidth-gridW)/2),startY=Math.max(0,(window.innerHeight-gridH)/2);var idx=0;for(var r=0;r<rows;r++){for(var c=0;c<cols;c++){addYesButton(startX+c*(btnW+gap),startY+r*(btnH+gap),idx,false);idx++;}}}
@@ -875,7 +877,7 @@ function doReboot(){
   if(franticCycleTimer){clearInterval(franticCycleTimer);franticCycleTimer=null;}
   franticActive=false;franticCenterBox=null;franticBoxes=[];
   document.getElementById('reboot-overlay').classList.remove('visible');document.getElementById('reboot-no-btn').classList.remove('hidden');var bigNo=document.getElementById('reboot-big-yes');bigNo.style.display='none';bigNo.textContent='YES';bigNo.onclick=doReboot;
-  var zone=document.getElementById('reboot-yes-zone');zone.innerHTML='';zone.classList.remove('active');zone.style.cssText='';
+  document.querySelectorAll('.reboot-yes-layer').forEach(function(el){el.remove();});var zone=document.getElementById('reboot-yes-zone');zone.innerHTML='';zone.classList.remove('active');zone.style.cssText='';
   document.getElementById('corruption-overlay').classList.remove('active');document.getElementById('corruption-chars').innerHTML='';document.getElementById('frantic-container').innerHTML='';document.getElementById('frantic-container').style.display='none';
   var ff=document.getElementById('friend-farewell');if(ff){ff.classList.remove('visible');ff.style.opacity='';ff.style.transition='';}
   var fft=document.getElementById('friend-farewell-text');if(fft)fft.textContent='';
